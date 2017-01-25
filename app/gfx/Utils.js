@@ -1,6 +1,5 @@
-import shaderSources from '../glsl';
-import Shader from './shader';
-import VertexArray from './vertexbuffer';
+import {textureShader} from './shader';
+import VertexArray from './VertexArray';
 export function nextPowOf2(x) {
     return Math.pow(2, Math.ceil(Math.log(x) / Math.log(2)));
 }
@@ -46,8 +45,6 @@ const uvVertArray = new VertexArray([
 ], [0, 1, 2, 0, 2, 3], [2, 2]);
 export function debugDrawTexture(texture) {
     uvVertArray.initialize(gl);
-    const textureShader = Shader(shaderSources.texture);
-    textureShader.compile(gl);
     gl.clear(gl.COLOR_BUFFER_BIT);
     textureShader.bind(gl);
     gl.activeTexture(gl.TEXTURE0);
@@ -58,3 +55,14 @@ export function debugDrawTexture(texture) {
     uvVertArray.unbind(gl);
     textureShader.unbind(gl);
 }
+
+
+export function degToRad(deg) {
+  return deg * Math.PI / 180;
+}
+
+
+export function radToDeg(rad) {
+  return rad * 180 / Math.PI;
+}
+
