@@ -1,4 +1,5 @@
 import * as glm from 'gl-matrix';
+import {Instance} from './Mesh.js';
 import {degToRad} from './Utils.js';
 
 function calculateModelMatrix(line) {
@@ -11,9 +12,9 @@ function calculateModelMatrix(line) {
     line.to[0] - line.from[0],
     line.to[1] - line.from[1],
     line.to[2] - line.from[2]
-  ]
+  ];
   let len = Math.sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]);
-  let angle = -Math.atan(p[1]/p[0]);
+  let angle = -Math.atan(p[0]/p[1]);
 
   glm.mat4.identity(line.mat);
   glm.mat4.translate(line.mat, line.mat, midpoint);
@@ -27,16 +28,32 @@ export default class Line {
     this.to = to;
     this.width = width;
     this.mat = glm.mat4.create();
-    if(from.length === 2) {
-      from[2] = 0.0;
+    if(this.from.length === 2) {
+      this.from[2] = 0.0;
     }
-    if(to.length === 2) {
-      to[2] = 0.0;
+    if(this.to.length === 2) {
+      this.to[2] = 0.0;
+    }
+    calculateModelMatrix(this);
+  }
+
+  setTo(to) {
+    this.to  = to;
+    if(this.to.length === 2) {
+      this.to[2] = 0.0;
+    }
+    calculateModelMatrix(this);
+  }
+
+  setFrom(from) {
+    this.from  = from;
+    if(this.from.length === 2) {
+      this.from[2] = 0.0;
     }
     calculateModelMatrix(this);
   }
 
   getModelMatrix() {
-    return this.mat
+    return this.mat;
   }
 }
