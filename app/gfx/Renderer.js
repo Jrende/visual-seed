@@ -24,29 +24,29 @@ class Renderer {
       [0, 1, 2,
         0, 2, 3],
       [3]);
+    this.drawMap.set("Line", {
+      vertexArray: this.quad,
+      instances: []
+    });
   }
 
   add(item) {
-    let entry = null;
-    if(this.drawMap.has(item.constructor.name)) {
-      entry = this.drawMap.get(item.constructor.name);
-    } else {
-      entry = {
-         vertexArray: this.getVertexArray(item.constructor.name),
-         instances: []
-       };
-       this.drawMap.set(item.constructor.name, entry);
+    switch(item.constructor.name) {
+      case "Line":
+        this.addLine(item);
+        break;
+      case "LineStrip":
+        item.lines.forEach(line => {
+          this.addLine(line);
+        });
+        break;
+      default:
     }
-    entry.instances.push(item);
+    
   }
 
-  getVertexArray(type) {
-    switch(type) {
-      case "Line":
-        return this.quad;
-      default:
-        return null;
-    }
+  addLine(item) {
+    this.drawMap.get("Line").instances.push(item);
   }
 
   render() {
