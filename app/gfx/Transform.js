@@ -1,6 +1,4 @@
 import * as glm from 'gl-matrix';
-import {Instance} from './Mesh.js';
-import {degToRad} from './Utils.js';
 
 /*
 function calculateModelMatrix(transform) {
@@ -30,7 +28,6 @@ export default class Transform {
   identity() {
     this.mat = glm.mat4.create();
   }
-
 
   translate(vec3) {
     glm.mat4.translate(this.mat, this.mat, vec3);

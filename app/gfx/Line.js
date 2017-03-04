@@ -1,6 +1,4 @@
 import * as glm from 'gl-matrix';
-import {Instance} from './Mesh.js';
-import {degToRad} from './Utils.js';
 import Transform from './Transform.js';
 
 function calculateModelMatrix(line) {
@@ -25,7 +23,7 @@ function calculateModelMatrix(line) {
 }
 
 export default class Line {
-  constructor(from, to, width = 50) {
+  constructor(from, to, width = 5) {
     this.from = from;
     this.to = to;
     this.width = width;
