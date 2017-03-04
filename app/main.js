@@ -1,8 +1,9 @@
 import VertexArray from './gfx/VertexArray';
 import * as glm from 'gl-matrix';
 import Line from './gfx/Line';
-import {degToRad} from './gfx/Utils.js';
+import LineStrip from './gfx/LineStrip';
 import Renderer from './gfx/Renderer.js';
+import {degToRad} from './gfx/Utils.js';
 import {Mesh} from './gfx/Mesh.js';
 
 let renderer = new Renderer();
@@ -12,16 +13,15 @@ let c = [50, -50];
 renderer.add(new Line(a, b, 5));
 renderer.add(new Line(b, c, 5));
 renderer.add(new Line(c, a, 5));
-/*
-renderer.add(new LineSegment(
+
+renderer.add(new LineStrip(
   [
     [0, 0],
     [50, 150],
     [200, 50],
     [70, 345]
-  ]
+  ], 10
 ));
-*/
 
 function drawPoint(x, y) {
   let mvp2 = glm.mat4.create();
