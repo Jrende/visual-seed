@@ -23,9 +23,16 @@
     "html-webpack-plugin": "^2.26.0",
     "raw-loader": "^0.5.1",
     "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "webpack-dev-server": "^2.4.1"
   },
   "scripts": {
-    "start": "./node_modules/.bin/webpack-dev-server"
+    "start": "node_modules/.bin/webpack-dev-server"
+  },
+  "devDependencies": {
+    "eslint": "^3.17.1",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.0"
   }
 }
