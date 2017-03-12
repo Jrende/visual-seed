@@ -1,11 +1,10 @@
+/* globals gl */
 export default class VertexArray {
   constructor(vertexData, indexData, attrs) {
     let shouldInitialize = true;
     if(Number.isInteger(vertexData) || Number.isInteger(indexData)) {
       shouldInitialize = false;
-    }
-
-    else if (vertexData instanceof Float32Array) {
+    } else if (vertexData instanceof Float32Array) {
       this.vertexData = vertexData;
     } else {
       this.vertexData = new Float32Array(vertexData);

@@ -56,4 +56,16 @@ export default class Line {
   getModelMatrix() {
     return this.transform.getModelMatrix();
   }
+
+  getMidpoint() {
+    return [
+      (this.to[0]+this.from[0]),
+      (this.to[1]+this.from[1]),
+      (this.to[2]+this.from[2])
+    ].map(i => i/2.0);
+  }
+  getDirection() {
+    let ret = glm.vec3.subtract(glm.vec3.create(), this.to, this.getMidpoint());
+    return glm.vec3.normalize(ret, ret);
+  }
 }
