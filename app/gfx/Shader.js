@@ -1,3 +1,4 @@
+/* globals gl */
 function compileShader(src, type) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, src);

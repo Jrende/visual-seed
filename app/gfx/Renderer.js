@@ -1,6 +1,8 @@
 import VertexArray from './VertexArray';
 import * as glm from 'gl-matrix';
 import shader from './shader';
+import Framebuffer from './Framebuffer';
+import { debugDrawTexture } from './Utils';
 
 /* global gl */
 class Renderer {
@@ -14,8 +16,11 @@ class Renderer {
     glm.mat4.translate(this.viewMatrix, this.viewMatrix, [0, 0, -10]);
     glm.mat4.ortho(this.projectionMatrix, width/2, -width/2, -height/2, height/2, 0.1, 100);
     //glm.mat4.perspective(this.projectionMatrix, 90, width/height, 0.1, 100);
+    this.width = width;
+    this.height = height;
     gl.disable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
+    this.framebuffer = new Framebuffer(width, height);
     this.quad = new VertexArray(
       [1, 1, 1,
         -1, 1, 1,
@@ -24,10 +29,7 @@ class Renderer {
       [0, 1, 2,
         0, 2, 3],
       [3]);
-    this.drawMap.set('Line', {
-      vertexArray: this.quad,
-      instances: []
-    });
+    this.drawMap.set(this.quad, []);
   }
 
   add(item) {
@@ -52,16 +54,13 @@ class Renderer {
       val.forEach((v) => acc.push(v));
       return acc;
     }, []);
-    this.drawMap.set(`join-${Math.random()}`, {
-      vertexArray: new VertexArray(arr, [0, 1, 2], [3]),
-      instances: [{
-        getModelMatrix: () => glm.mat4.create()
-      }]
-    });
+    this.drawMap.set(new VertexArray(arr, [0, 1, 2], [3]), [{
+      getModelMatrix: glm.mat4.create
+    }]);
   }
 
   addLine(item) {
-    this.drawMap.get('Line').instances.push(item);
+    this.drawMap.get(this.quad).push(item);
   }
 
   drawPoint(vec, scale=2) {
@@ -85,18 +84,29 @@ class Renderer {
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
   }
 
+  renderQuad(quadShader) {
+    quadShader.bind();
+    this.quad.bind();
+    quadShader.uniforms.resolution = [this.width, this.height];
+    quadShader.uniforms.size = 1.0;
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    this.quad.unbind();
+    quadShader.unbind();
+  }
+
 
   render() {
+    this.framebuffer.bind();
     gl.clear(gl.COLOR_BUFFER_BIT);
     shader.solid.bind();
-    this.drawMap.forEach(mesh => {
-      mesh.vertexArray.bind();
+    this.drawMap.forEach((instances, vertexArray) => {
+      vertexArray.bind();
 
       let vp = glm.mat4.create();
-      let len = mesh.vertexArray.indexData.length;
+      let len = vertexArray.indexData.length;
       glm.mat4.multiply(vp, vp, this.projectionMatrix);
       glm.mat4.multiply(vp, vp, this.viewMatrix);
-      mesh.instances.forEach(instance => {
+      instances.forEach(instance => {
         let mvp = glm.mat4.create();
         glm.mat4.multiply(mvp, vp, instance.getModelMatrix());
 
@@ -107,9 +117,15 @@ class Renderer {
         shader.solid.uniforms.mvp = mvp;
         gl.drawElements(gl.TRIANGLES, len, gl.UNSIGNED_SHORT, 0);
       });
-      mesh.vertexArray.unbind();
+      vertexArray.unbind();
     });
     shader.solid.unbind();
+    this.framebuffer.unbind();
+    this.present();
+  }
+
+  present() {
+    debugDrawTexture(this.framebuffer.texture);
   }
 }
 export default Renderer;
