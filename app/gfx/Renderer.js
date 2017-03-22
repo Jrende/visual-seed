@@ -20,7 +20,8 @@ class Renderer {
     this.height = height;
     gl.disable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
-    this.framebuffer = new Framebuffer(width, height);
+    this.buffers = [new Framebuffer(width, height), new Framebuffer(width, height)];
+    this.empty = new Framebuffer(width, height);
     this.quad = new VertexArray(
       [1, 1, 1,
         -1, 1, 1,
@@ -94,9 +95,28 @@ class Renderer {
     quadShader.unbind();
   }
 
+  bindBuffer() {
+    this.buffers[0].bind();
+  }
+
+  unbindBuffer() {
+    this.buffers[0].unbind();
+    this.buffers.reverse();
+  }
 
   render() {
-    this.framebuffer.bind();
+    let blurAmount = 2.0;
+    this.renderScene();
+    //debugDrawTexture(this.buffers[0].texture);
+    for(let i = 0; i < 1; i++) {
+      this.blur([0.0, 1.0], blurAmount);
+      this.blur([1.0, 0.0], blurAmount);
+    }
+    this.present();
+  }
+
+  renderScene() {
+    this.bindBuffer();
     gl.clear(gl.COLOR_BUFFER_BIT);
     shader.solid.bind();
     this.drawMap.forEach((instances, vertexArray) => {
@@ -120,12 +140,29 @@ class Renderer {
       vertexArray.unbind();
     });
     shader.solid.unbind();
-    this.framebuffer.unbind();
-    this.present();
+    this.unbindBuffer();
+  }
+
+  blur(dir, radius) {
+    this.bindBuffer();
+    let blur = shader.blur;
+    blur.bind();
+    this.quad.bind();
+    blur.uniforms.resolution = this.width;
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.buffers[1].texture);
+    blur.uniforms.texture = this.buffers[1].texture;
+    blur.uniforms.radius = radius;
+    blur.uniforms.dir = dir;
+
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    this.quad.unbind();
+    blur.unbind();
+    this.unbindBuffer();
   }
 
   present() {
-    debugDrawTexture(this.framebuffer.texture);
+    debugDrawTexture(this.buffers[1].texture);
   }
 }
 export default Renderer;

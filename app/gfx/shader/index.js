@@ -4,21 +4,28 @@ import gradientFrag from './glsl/gradient.frag';
 import gradientVert from './glsl/gradient.vert';
 import textureFrag from './glsl/textureShader.frag';
 import textureVert from './glsl/textureShader.vert';
+import blurFrag from './glsl/blur.frag';
+import blurVert from './glsl/blur.vert';
 import Shader from '../Shader';
 
-let solid = new Shader({
-  frag: solidFrag,
-  vert: solidVert
-});
+export default {
+  solid: new Shader({
+    frag: solidFrag,
+    vert: solidVert
+  }),
 
-let gradient = new Shader({
-  frag: gradientFrag,
-  vert: gradientVert
-});
+  gradient: new Shader({
+    frag: gradientFrag,
+    vert: gradientVert
+  }),
 
-let texture = new Shader({
-  frag: textureFrag,
-  vert: textureVert
-});
+  blur: new Shader({
+    frag: blurFrag,
+    vert: blurVert
+  }),
 
-export default { solid, gradient, texture };
+  texture: new Shader({
+    frag: textureFrag,
+    vert: textureVert
+  })
+};
