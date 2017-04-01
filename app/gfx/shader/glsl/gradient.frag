@@ -11,7 +11,7 @@ void main( void ) {
   vec2 c = resolution.xy / 2.0;
 
   float d = sqrt((p.x - c.x)*(p.x - c.x)+(p.y - c.y)*(p.y - c.y));
-  vec3 color = mix(vec3(1,1,1), vec3(0,0,0), (d/clamp(resolution.x * size, 10.0, 0.1)));
+  vec3 color = mix(vec3(1,1,1), vec3(0,0,0), (d/(resolution.x * size)));
   //color *= cos(p.y);
 
   gl_FragColor = vec4(vec3(color), 1.0);

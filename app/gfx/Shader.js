@@ -18,7 +18,8 @@ function createShaderProgram(vertexShader, fragmentShader) {
   gl.attachShader(shaderProgram, fragmentShader);
   gl.linkProgram(shaderProgram);
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    console.error('Could not initialise shaders');
+    var info = gl.getProgramInfoLog(shaderProgram);
+    console.error(`Error compiling shader: \n\n${info}`);
   }
   gl.useProgram(shaderProgram);
   const loc = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
@@ -69,8 +70,7 @@ function createUniformFunction(name, type, shader) {
 }
 function createUniforms(shader) {
   const uniforms = getUniforms([shader.vert, shader.frag]);
-  Object.entries(uniforms)
-    .forEach((u) => createUniformFunction(u[0], u[1], shader));
+  Object.entries(uniforms).forEach((u) => createUniformFunction(u[0], u[1], shader));
 }
 class Shader {
   constructor(src) {

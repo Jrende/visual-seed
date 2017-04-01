@@ -5,6 +5,7 @@ uniform sampler2D texture;
 uniform float resolution;
 uniform float radius;
 uniform vec2 dir;
+uniform vec3 color;
 
 void main() {
   //this will be our RGBA sum
@@ -39,5 +40,5 @@ void main() {
   sum += texture2D(texture, vec2(tc.x + 4.0*blur*hstep, tc.y + 4.0*blur*vstep)) * 0.0162162162;
 
   //discard alpha for our simple demo, multiply by vertex color and return
-  gl_FragColor = vec4(sum.rgb, 1.0);
+  gl_FragColor = vec4(vec3(sum.rgb * color), sum.a);
 }

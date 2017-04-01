@@ -37,6 +37,7 @@ export function normalize(vec) {
     }
   }
 }
+
 const uvVertArray = new VertexArray([
   1.0, 1.0, 1.0, 1.0,
   -1.0, 1.0, 0.0, 1.0,
@@ -44,17 +45,19 @@ const uvVertArray = new VertexArray([
   1.0, -1.0, 1.0, 0.0
 ], [0, 1, 2, 0, 2, 3], [2, 2]);
 /* global gl */
-export function debugDrawTexture(texture) {
+export function drawTexture(texture, opacity=1.0) {
+  let shader = shaders.texture;
   uvVertArray.initialize(gl);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  shaders.texture.bind(gl);
+  shader.bind(gl);
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, texture);
-  shaders.texture.uniforms.sampler = 0;
+  shader.uniforms.sampler = 0;
+  shader.uniforms.opacity = opacity;
   uvVertArray.bind(gl);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
   uvVertArray.unbind(gl);
-  shaders.texture.unbind(gl);
+  shader.unbind(gl);
 }
 
 
