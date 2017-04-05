@@ -2,8 +2,50 @@ import VertexArray from './VertexArray';
 import * as glm from 'gl-matrix';
 import shader from './shader';
 import Framebuffer from './Framebuffer';
+import LineStrip from './LineStrip';
 import { degToRad } from './Utils';
 
+function floatEquals(actual, expected, margin) {
+  return actual > (expected - margin) && actual < (expected + margin);
+}
+
+function getStem(from, to, segments) {
+  let list = [];
+  for(let i = 0; i < segments; i++) {
+    let y = (to[1] - from[1])/segments * i;
+    list.push([Math.random() * 50 + from[0], y + from[1], from[2]]);
+  }
+  list.push(to);
+  return list;
+}
+
+function generateField(num = 20, radius = 1000) {
+  let field = [];
+  for(let i = 0; i < num; i++) {
+    let id = Math.random().toString().substr(2);
+    let pos = [Math.random() * radius, 0, -Math.random() * radius];
+
+    let stemHeight = Math.random() * 150;
+    let stem = new LineStrip(getStem(
+      [pos[0], pos[1] + 0, pos[2]],
+      [pos[0], pos[1] + stemHeight, pos[2]], 4), 4);
+    let petalLines = [
+      [0, 0, 0],
+      [50, 50, 0],
+      [-50, 50, 0],
+      [0, 0, 0],
+      [50, 50, 0]];
+    let petal = new LineStrip(petalLines.map(line => [
+      line[0] + pos[0],
+      line[1] + stemHeight + pos[1],
+      line[2] + pos[2]
+    ]), 4);
+    stem.id = id;
+    petal.id = id;
+    field.push(stem, petal);
+  }
+  return field;
+}
 
 /* global gl */
 class Renderer {
@@ -26,6 +68,8 @@ class Renderer {
     this.buffers = [new Framebuffer(width, height, true), new Framebuffer(width, height, true)];
     this.bloomBuffers = [new Framebuffer(width, height), new Framebuffer(width, height)];
     this.stencilBuffer = new Framebuffer(width, height);
+    this.penBuffers = [new Framebuffer(width, height), new Framebuffer(width, height)];
+    this.finalBuffer = new Framebuffer(width, height);
     this.testBuffer = [
       new Framebuffer(width, height),
       new Framebuffer(width, height),
@@ -39,15 +83,62 @@ class Renderer {
       [0, 1, 2,
         0, 2, 3],
       [3]);
-    this.uvVertArray = new VertexArray([
-      1.0, 1.0, 1.0, 1.0,
-      -1.0, 1.0, 0.0, 1.0,
-      -1.0, -1.0, 0.0, 0.0,
-      1.0, -1.0, 1.0, 0.0
-    ], [0, 1, 2, 0, 2, 3], [2, 2]);
     this.drawMap.set(this.quad, []);
 
-    this.generateClipBuffer();
+    this.init();
+  }
+
+  tick() {
+    let now = new Date().getTime();
+    let deltaT = now - this.prevTime;
+    this.elapsedTime += (deltaT / 1000) * this.direction;
+    let val = Math.sin(this.elapsedTime / 2.5) * 1 + 1.0;
+    this.viewMatrix[5] = val;
+    if(floatEquals(val, 0, 0.008)) {
+      let id = this.getRandomItemId();
+      this.removeItem(id);
+      let flower = generateField(1, 800);
+      flower.forEach((f) => this.add(f));
+    }
+    this.prevTime = now;
+  }
+
+  clearItems() {
+    this.drawMap.forEach((instances) => {
+      instances.length = 0;
+    });
+  }
+
+  init() {
+    this.elapsedTime = 0.0;
+    this.viewMatrix[5] = 0.0;
+    this.start = new Date().getTime();
+    this.prevTime = this.start;
+    this.seed = Math.random();
+    this.direction = 1.0;
+    this.clearItems();
+    let items = generateField(20, 800);
+    items.forEach(item => this.add(item));
+    window.setInterval(() => {
+    }, 500);
+  }
+
+  getRandomItemId() {
+    let items = this.drawMap.get(this.quad);
+    let randomId = items[(Math.random() * items.length).toFixed()].id;
+    return randomId;
+  }
+
+  removeItem(id) {
+    this.drawMap.forEach((instances) => {
+      let toRemove = [];
+      for(let i = 0; i < instances.length; i++) {
+        if(instances[i].id === id) {
+          toRemove.push(i);
+        }
+      }
+      toRemove.sort().reverse().forEach((i) => instances.splice(i, 1));
+    });
   }
 
   add(item) {
@@ -57,9 +148,11 @@ class Renderer {
         break;
       case 'LineStrip':
         item.lines.forEach(line => {
+          line.id = item.id;
           this.addLine(line);
         });
         item.getJoins().forEach(join => {
+          join.id = item.id;
           this.addJoin(join);
         });
         break;
@@ -113,9 +206,26 @@ class Renderer {
   }
 
   render() {
+    this.tick();
+
+    this.generateClipBuffer();
+
     this.buffers[0].renderTo(() => this.renderScene());
     this.buffers[1].renderTo(() => this.renderReflection());
     this.generateBloomBuffers(4.0, [1.0, 1.0, 1.0]);
+
+    this.penBuffers[0].renderTo(() => {
+      this.blend(this.buffers[0].texture, this.bloomBuffers[0].texture);
+    });
+
+    this.penBuffers[1].renderTo(() => {
+      this.blend(this.buffers[1].texture, this.bloomBuffers[1].texture);
+    });
+
+    this.finalBuffer.renderTo(() => {
+      this.blend(this.penBuffers[0].texture, this.penBuffers[1].texture);
+    });
+
     this.present();
   }
 
@@ -135,9 +245,9 @@ class Renderer {
     shader.discard.uniforms.texture = 0;
     shader.discard.limit = 0.8;
 
-    this.uvVertArray.bind();
+    this.quad.bind();
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    this.uvVertArray.unbind();
+    this.quad.unbind();
 
     shader.discard.unbind();
 
@@ -162,57 +272,58 @@ class Renderer {
   }
 
   generateClipBuffer() {
+    let time = (new Date().getTime() - this.start) / 1000.0;
     this.testBuffer[0].renderTo(() => {
       gl.clear(gl.COLOR_BUFFER_BIT);
       let s = shader.cloud;
       s.bind();
       s.uniforms.res = [this.width, this.height];
-      s.uniforms.seed = Math.random();
-      s.uniforms.size = 100.0;
-      s.uniforms.depth = 1.0;
-      s.uniforms.nabla = 1.0;
-      s.uniforms.alpha = 1.0;
+      s.uniforms.seed = this.seed;
+      s.uniforms.size = 20.0;
+      s.uniforms.density = 0.3;
+      s.uniforms.left = time;
 
       s.uniforms.r = 1.0;
       s.uniforms.g = 1.0;
       s.uniforms.b = 1.0;
 
-      this.uvVertArray.bind();
+      this.quad.bind();
       gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-      this.uvVertArray.unbind();
+      this.quad.unbind();
       s.unbind();
     });
 
+    /*
     this.testBuffer[1].renderTo(() => {
       gl.clear(gl.COLOR_BUFFER_BIT);
       let g = shader.gradient;
       g.bind();
       g.uniforms.resolution = [this.width, this.height];
-      g.uniforms.size = 0.5;
+      g.uniforms.size = 0.1;
 
-      this.uvVertArray.bind();
+      this.quad.bind();
       gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-      this.uvVertArray.unbind();
+      this.quad.unbind();
       g.unbind();
     });
     this.testBuffer[2].renderTo(() => {
       this.blend(this.testBuffer[0].texture, this.testBuffer[1].texture);
     });
+    */
 
     this.stencilBuffer.renderTo(() => {
       gl.clear(gl.COLOR_BUFFER_BIT);
-      let clamp = shader.clamp;
-      clamp.bind();
-      clamp.uniforms.limit = 0.4;
+      shader.clamp.bind();
+      shader.clamp.uniforms.limit = 0.3;
 
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.testBuffer[2].texture);
-      clamp.uniforms.sampler = 0;
+      gl.bindTexture(gl.TEXTURE_2D, this.testBuffer[0].texture);
+      shader.clamp.uniforms.sampler = 0;
 
-      this.uvVertArray.bind();
+      this.quad.bind();
       gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-      this.uvVertArray.unbind();
-      clamp.unbind();
+      this.quad.unbind();
+      shader.clamp.unbind();
     });
   }
 
@@ -225,16 +336,19 @@ class Renderer {
       let vp = glm.mat4.create();
       let len = vertexArray.indexData.length;
       glm.mat4.multiply(vp, vp, this.projectionMatrix);
+
       glm.mat4.multiply(vp, vp, this.viewMatrix);
       instances.forEach(instance => {
         let mvp = glm.mat4.create();
-        glm.mat4.multiply(mvp, vp, instance.getModelMatrix());
+        let modelMat = instance.getModelMatrix();
+        glm.mat4.multiply(mvp, vp, modelMat);
 
         shader.solid.uniforms.r = 0.2;
         shader.solid.uniforms.g = 0.5;
         shader.solid.uniforms.b = 0.1;
         shader.solid.uniforms.alpha = 0.1;
         shader.solid.uniforms.mvp = mvp;
+        shader.solid.uniforms.modelMat = modelMat;
         gl.drawElements(gl.TRIANGLES, len, gl.UNSIGNED_SHORT, 0);
       });
       vertexArray.unbind();
@@ -261,11 +375,9 @@ class Renderer {
   }
 
   present() {
+    gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    //this.drawTexture(this.stencilBuffer.texture);
-    gl.blendFunc(gl.ONE_MINUS_SRC_COLOR, gl.ONE_MINUS_DST_COLOR);
-    this.blend(this.buffers[0].texture, this.bloomBuffers[0].texture);
-    this.blend(this.buffers[1].texture, this.bloomBuffers[1].texture);
+    this.drawTextureWithColorMap(this.finalBuffer.texture);
   }
 
   blend(left, right) {
@@ -279,11 +391,22 @@ class Renderer {
     gl.bindTexture(gl.TEXTURE_2D, right);
     shader.blend.uniforms.right = 1;
 
-    this.uvVertArray.bind();
+    this.quad.bind();
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    this.uvVertArray.unbind();
+    this.quad.unbind();
 
     shader.blend.unbind();
+  }
+
+  drawTextureWithColorMap(texture) {
+    shader.colorMap.bind();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    shader.colorMap.uniforms.sampler = 0;
+    this.quad.bind();
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    this.quad.unbind();
+    shader.colorMap.unbind();
   }
 
   drawTexture(texture, opacity=1.0) {
@@ -292,9 +415,9 @@ class Renderer {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     shader.texture.uniforms.sampler = 0;
     shader.texture.uniforms.opacity = opacity;
-    this.uvVertArray.bind();
+    this.quad.bind();
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    this.uvVertArray.unbind();
+    this.quad.unbind();
     shader.texture.unbind();
   }
 

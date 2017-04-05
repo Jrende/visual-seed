@@ -81,4 +81,11 @@ export default class VertexArray {
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
+
+  free() {
+    gl.deleteBuffer(this.vertBuf);
+    if(this.indexBuf) {
+      gl.deleteBuffer(this.indexBuf);
+    }
+  }
 }

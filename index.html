@@ -3,21 +3,83 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <title>This is art!</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+<head>
+  <meta charset="utf-8">
+  <title>This is art!</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
 
-    </head>
-    <body>
-        <!--[if lt IE 10]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
+</head>
+<style>
+canvas {
+  margin-left: auto;
+  margin-right: auto;
+}
+body {
+  margin: 0;
+  padding: 0;
+}
 
-        <canvas id="canvas" width="512" height="512"></canvas>
-        <script src="/dist/init.js"></script>
-        <script src="/dist/app.js"></script>
-    </body>
+audio {
+  display: none;
+}
+
+#mute {
+  position: absolute;
+  width: 2em;
+  height: 2em;
+  bottom: 0;
+  left: 0;
+}
+
+  .horiz {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    height: 100vw;
+  }
+
+  .vert {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+</style>
+<body>
+  <div class="horiz">
+    <div class="vert">
+      <canvas id="canvas" width="2048" height="1024"></canvas>
+    </div>
+  </div>
+  <img src="Speaker_Icon.svg" id="mute">
+  <audio controls loop autoplay>
+    <source src="pappa58.ogg" type="audio/ogg">
+    <source src="pappa58.mp3" type="audio/mpeg3">
+  </audio>
+
+  <script src="/dist/init.js"></script>
+  <script src="/dist/app.js"></script>
+  <script>
+var vid = document.getElementsByTagName("audio")[0];
+vid.volume = 0.5;
+vid.addEventListener("timeupdate", function() {
+  if(vid.currentTime > 59.0) {
+    vid.currentTime = 0
+  }
+});
+var m = document.querySelector("#mute");
+m.addEventListener("click", function(e) {
+  e.stopPropagation();
+  if(vid.paused) {
+    m.src = "Speaker_Icon.svg";
+    vid.play();
+  } else {
+    m.src = "Mute_Icon.svg";
+    vid.pause();
+  }
+});
+  </script>
+</body>
 </html>

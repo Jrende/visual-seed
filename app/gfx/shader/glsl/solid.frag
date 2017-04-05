@@ -3,7 +3,9 @@ uniform float alpha;
 uniform float r;
 uniform float g;
 uniform float b;
+varying vec3 worldPos;
 
 void main(void) {
-  gl_FragColor = vec4(r, g, b, alpha);
+  vec4 color = vec4(r, g, b, alpha); 
+  gl_FragColor = color;
 }

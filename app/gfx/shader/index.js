@@ -14,6 +14,8 @@ import discardFrag from './glsl/discard.frag';
 import discardVert from './glsl/discard.vert';
 import clampFrag from './glsl/clamp.frag';
 import clampVert from './glsl/clamp.vert';
+import colorMapFrag from './glsl/colorMap.frag';
+import colorMapVert from './glsl/colorMap.vert';
 import Shader from '../Shader';
 
 export default {
@@ -55,5 +57,10 @@ export default {
   discard: new Shader({
     frag: discardFrag,
     vert: discardVert
+  }),
+
+  colorMap: new Shader({
+    frag: colorMapFrag,
+    vert: colorMapVert
   })
 };
