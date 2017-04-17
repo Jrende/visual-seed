@@ -2,6 +2,8 @@ import VertexArray from './VertexArray';
 import * as glm from 'gl-matrix';
 import shader from './shader';
 import { degToRad } from './Utils.js';
+import Line from './Line.js';
+import LineStrip from './LineStrip.js';
 /* global gl */
 class Renderer {
   constructor() {
@@ -37,21 +39,17 @@ class Renderer {
   }
 
   add(item) {
-    switch(item.constructor.name) {
-      case 'Line':
-        this.addLine(item);
-        break;
-      case 'LineStrip':
-        item.lines.forEach(line => {
-          line.id = item.id;
-          this.addLine(line);
-        });
-        item.getJoins().forEach(join => {
-          join.id = item.id;
-          this.addJoin(join);
-        });
-        break;
-      default:
+    if(item instanceof Line) {
+      this.addLine(item);
+    } else if(item instanceof LineStrip) {
+      item.lines.forEach(line => {
+        line.id = item.id;
+        this.addLine(line);
+      });
+      item.getJoins().forEach(join => {
+        join.id = item.id;
+        this.addJoin(join);
+      });
     }
   }
 
