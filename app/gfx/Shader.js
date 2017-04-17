@@ -1,4 +1,6 @@
 /* globals gl */
+
+let dataTypes = ['float', 'vec2', 'vec3', 'vec4', 'mat3', 'mat4', 'sampler2D'];
 function compileShader(src, type) {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, src);
@@ -18,7 +20,7 @@ function createShaderProgram(vertexShader, fragmentShader) {
   gl.attachShader(shaderProgram, fragmentShader);
   gl.linkProgram(shaderProgram);
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    var info = gl.getProgramInfoLog(shaderProgram);
+    let info = gl.getProgramInfoLog(shaderProgram);
     console.error(`Error compiling shader: \n\n${info}`);
   }
   gl.useProgram(shaderProgram);
@@ -26,59 +28,111 @@ function createShaderProgram(vertexShader, fragmentShader) {
   gl.enableVertexAttribArray(loc);
   return shaderProgram;
 }
-function getUniformGetter(uniformHandle, shader) {
-  return () => gl.getActiveUniform(shader.program, uniformHandle);
-}
-function getUniformSetter(uniformHandle, type) {
+
+function setUniform(uniformHandle, type, value) {
   switch (type) {
-    case 'float': return (value) => gl.uniform1f(uniformHandle, value);
-    case 'vec2': return (value) => gl.uniform2fv(uniformHandle, value);
-    case 'vec3': return (value) => gl.uniform3fv(uniformHandle, value);
-    case 'vec4': return (value) => gl.uniform4fv(uniformHandle, value);
-    case 'mat3': return (value) => gl.uniformMatrix3fv(uniformHandle, false, value);
-    case 'mat4': return (value) => gl.uniformMatrix4fv(uniformHandle, false, value);
-    case 'sampler2D': return (value) => gl.uniform1i(uniformHandle, value);
+    case 'float': return gl.uniform1f(uniformHandle, value);
+    case 'vec2': return gl.uniform2fv(uniformHandle, value);
+    case 'vec3': return gl.uniform3fv(uniformHandle, value);
+    case 'vec4': return gl.uniform4fv(uniformHandle, value);
+    case 'mat3': return gl.uniformMatrix3fv(uniformHandle, false, value);
+    case 'mat4': return gl.uniformMatrix4fv(uniformHandle, false, value);
+    case 'sampler2D': return gl.uniform1i(uniformHandle, value);
     default: {
       console.error('Unable to create uniform setter for type', type);
       return undefined;
     }
   }
 }
-function getUniforms(sources) {
-  const uniforms = {};
-  sources.forEach(source => {
-    const matches = source.match(/uniform.*/g);
-    if (matches) {
-      matches
-        .map(u => u.substring(8, u.length - 1))
-        .map(u => u.split(' '))
-        .forEach((u) => {
-          uniforms[u[1]] = u[0];
-        });
+
+function handleStruct(tokens) {
+  console.log('handleStruct');
+  let uniforms = [];
+  let name = '';
+  for(let i = 0; i < tokens.length; i++) {
+    if(dataTypes.includes(tokens[i])) {
+      uniforms.push({
+        name: tokens[i + 1],
+        type: tokens[i]
+      });
+    } else if(tokens[i] === '}') {
+      name = tokens[i + 1];
+      break;
     }
-  });
+  }
+  return { name, uniforms };
+}
+
+function getUniforms(sources) {
+  let regex = /( |\n|;)/;
+  let uniforms = {};
+  for(let i = 0; i < sources.length; i++) {
+    let tokens = sources[i].split(regex).filter(t => t !== undefined &&
+      t.length !== 0 &&
+      t !== ' ' &&
+      t !== ';');
+    for(let j = 0; j < tokens.length; j++) {
+      if(tokens[j] === 'uniform') {
+        if(tokens[j + 1] === 'struct') {
+          let struct = handleStruct(tokens.slice(j + 1));
+          struct.uniforms.forEach(uniform => {
+            uniforms[`${struct.name}.${uniform.name}`] = {
+              type: uniform.type
+            };
+          });
+        } else {
+          uniforms[tokens[j + 2]] = {
+            type: tokens[j + 1]
+          };
+        }
+      }
+    }
+  }
   return uniforms;
 }
-function createUniformFunction(name, type, shader) {
-  const uniformHandle = gl.getUniformLocation(shader.program, name);
-  Object.defineProperty(shader.uniforms, name, {
-    enumerable: true,
-    configurable: false,
-    get: getUniformGetter(uniformHandle, shader),
-    set: getUniformSetter(uniformHandle, type)
+
+function createUniformHandles(shader) {
+  Object.entries(shader.uniforms).forEach(uniform => {
+    uniform[1].handle = gl.getUniformLocation(shader.program, uniform[0]);
   });
 }
-function createUniforms(shader) {
-  const uniforms = getUniforms([shader.vert, shader.frag]);
-  Object.entries(uniforms).forEach((u) => createUniformFunction(u[0], u[1], shader));
+
+function isValue(value) {
+  return !(value instanceof Object) ||
+    (value instanceof Array) ||
+    (value instanceof Float32Array) ||
+    (value instanceof Float64Array) ||
+    (value instanceof Int32Array) ||
+    (value instanceof Int8Array) ||
+    (value instanceof Int16Array);
 }
-class Shader {
+
+function getUniformValues(uniforms, ret = [], name = '') {
+  let keys = Object.keys(uniforms);
+  for(let i = 0; i < keys.length; i++) {
+    let key = keys[i];
+    let value = uniforms[key];
+    if(isValue(value)) {
+      ret.push({
+        name: name + key,
+        value
+      });
+    } else {
+      getUniformValues(value, ret, `${key}.${name}`);
+    }
+  }
+
+  return ret;
+}
+
+export default class Shader {
   constructor(src) {
     this.vert = src.vert;
     this.frag = src.frag;
-    this.uniforms = Object.create(null);
+    this.uniforms = getUniforms([src.vert, src.frag]);
     this.compile();
   }
+
   bind() {
     gl.useProgram(this.program);
   }
@@ -88,8 +142,21 @@ class Shader {
       const vertProgram = compileShader(this.vert, gl.VERTEX_SHADER);
       const fragProgram = compileShader(this.frag, gl.FRAGMENT_SHADER);
       this.program = createShaderProgram(vertProgram, fragProgram);
-      createUniforms(this);
+      createUniformHandles(this);
     }
+  }
+
+  setUniforms(uniforms) {
+    let values = getUniformValues(uniforms);
+    values.forEach(value => {
+      let uniform = this.uniforms[value.name];
+      if(!uniform) {
+        console.error(`Unable to find uniform ${value.name}!`);
+        return;
+      }
+      //TODO: add validation, compare value type to uniform type etc.
+      setUniform(uniform.handle, uniform.type, value.value);
+    });
   }
 
   unbind() {
@@ -97,4 +164,3 @@ class Shader {
   }
 }
 
-export default Shader;

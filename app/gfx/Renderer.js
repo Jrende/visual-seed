@@ -1,7 +1,7 @@
 import VertexArray from './VertexArray';
 import * as glm from 'gl-matrix';
 import shader from './shader';
-import { degToRad } from './Utils.js';
+//import { degToRad } from './Utils.js';
 import Line from './Line.js';
 import LineStrip from './LineStrip.js';
 /* global gl */
@@ -87,12 +87,14 @@ class Renderer {
         let modelMat = instance.getModelMatrix();
         glm.mat4.multiply(mvp, vp, modelMat);
 
-        shader.solid.uniforms.r = 0.2;
-        shader.solid.uniforms.g = 0.5;
-        shader.solid.uniforms.b = 0.1;
-        shader.solid.uniforms.alpha = 0.1;
-        shader.solid.uniforms.mvp = mvp;
-        shader.solid.uniforms.modelMat = modelMat;
+        shader.solid.setUniforms({
+          r: 0.2,
+          g: 0.5,
+          b: 0.1,
+          alpha: 0.1,
+          mvp,
+          modelMat
+        });
         gl.drawElements(gl.TRIANGLES, len, gl.UNSIGNED_SHORT, 0);
       });
       vertexArray.unbind();

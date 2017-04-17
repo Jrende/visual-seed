@@ -1,5 +1,6 @@
 import solidFrag from './glsl/solid.frag';
 import solidVert from './glsl/solid.vert';
+/*
 import gradientFrag from './glsl/gradient.frag';
 import gradientVert from './glsl/gradient.vert';
 import blendFrag from './glsl/combine.frag';
@@ -16,51 +17,14 @@ import clampFrag from './glsl/clamp.frag';
 import clampVert from './glsl/clamp.vert';
 import colorMapFrag from './glsl/colorMap.frag';
 import colorMapVert from './glsl/colorMap.vert';
+*/
 import Shader from '../Shader';
 
+let solid = new Shader({
+  frag: solidFrag,
+  vert: solidVert
+});
+
 export default {
-  solid: new Shader({
-    frag: solidFrag,
-    vert: solidVert
-  }),
-
-  gradient: new Shader({
-    frag: gradientFrag,
-    vert: gradientVert
-  }),
-
-  blur: new Shader({
-    frag: blurFrag,
-    vert: blurVert
-  }),
-
-  blend: new Shader({
-    frag: blendFrag,
-    vert: blendVert
-  }),
-
-  texture: new Shader({
-    frag: textureFrag,
-    vert: textureVert
-  }),
-
-  cloud: new Shader({
-    frag: cloudFrag,
-    vert: cloudVert
-  }),
-
-  clamp: new Shader({
-    frag: clampFrag,
-    vert: clampVert
-  }),
-
-  discard: new Shader({
-    frag: discardFrag,
-    vert: discardVert
-  }),
-
-  colorMap: new Shader({
-    frag: colorMapFrag,
-    vert: colorMapVert
-  })
+  solid
 };
