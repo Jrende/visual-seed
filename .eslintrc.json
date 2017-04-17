@@ -1,0 +1,21 @@
+{
+  "extends": "airbnb",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": false
+    }
+  },
+  "rules": {
+    "semi": 2,
+    "prefer-const": "off",
+    "spaced-comment": "off",
+    "comma-dangle": "off",
+    "no-console": "off",
+    "no-param-reassign": "off",
+    "keyword-spacing": "off",
+    "react/jsx-no-bind": "off",
+    "space-infix-ops": "off"
+  }
+}
