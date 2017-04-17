@@ -1,16 +1,13 @@
-var path = require('path');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+let path = require('path');
+let HtmlWebpackPlugin = require('html-webpack-plugin');
 
-
-var init = path.join(__dirname, 'app/init.js');
-var app = path.join(__dirname, 'app/main.js');
-var dist = path.join(__dirname, 'dist');
+let app = path.join(__dirname, 'app/main');
+let dist = path.join(__dirname, 'dist');
+let index = path.join(__dirname, 'index.html');
 
 module.exports = {
   entry: {
-    "app": app,
-    "init": init
+    app
   },
   devtool: 'source-map',
   output: {
@@ -23,8 +20,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'index.html',
+      template: index,
       inject: false
     })
   ],
@@ -34,10 +30,7 @@ module.exports = {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
-        include: __dirname,
-        query: {
-          presets: ['es2015', 'es2016', 'es2017']
-        }
+        include: __dirname
       },
       {
         test: /\.(frag|vert)$/,
