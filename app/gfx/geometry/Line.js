@@ -1,5 +1,5 @@
 import * as glm from 'gl-matrix';
-import Transform from './Transform.js';
+import Transform from '../Transform.js';
 
 function calculateModelMatrix(line) {
   let midpoint = [

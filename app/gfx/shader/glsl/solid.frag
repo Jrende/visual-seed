@@ -3,7 +3,11 @@ uniform float alpha;
 uniform float r;
 uniform float g;
 uniform float b;
-varying vec3 worldPos;
+
+// uniform float asdasd;
+/*
+uniform vec3 afvjiefjio;
+*/
 
 void main(void) {
   vec4 color = vec4(r, g, b, alpha); 

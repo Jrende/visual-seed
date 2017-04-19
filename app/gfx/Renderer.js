@@ -1,9 +1,8 @@
 import VertexArray from './VertexArray';
 import * as glm from 'gl-matrix';
 import shader from './shader';
-//import { degToRad } from './Utils.js';
-import Line from './Line.js';
-import LineStrip from './LineStrip.js';
+import Line from './geometry/Line.js';
+import LineStrip from './geometry/LineStrip.js';
 /* global gl */
 class Renderer {
   constructor() {

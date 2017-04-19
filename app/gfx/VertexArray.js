@@ -1,10 +1,7 @@
 /* globals gl */
 export default class VertexArray {
   constructor(vertexData, indexData, attrs) {
-    let shouldInitialize = true;
-    if(Number.isInteger(vertexData) || Number.isInteger(indexData)) {
-      shouldInitialize = false;
-    } else if (vertexData instanceof Float32Array) {
+    if (vertexData instanceof Float32Array) {
       this.vertexData = vertexData;
     } else {
       this.vertexData = new Float32Array(vertexData);
@@ -17,44 +14,21 @@ export default class VertexArray {
     }
 
     this.attrs = attrs;
-    this.isInitialized = false;
-    this.vertIndex = 0;
-    this.indexIndex = 0;
-    if (shouldInitialize) {
-      this.initialize();
-    }
+    this.initialize();
   }
+
   initialize() {
-    if (!this.isInitialized) {
-      this.vertBuf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuf);
-      gl.bufferData(gl.ARRAY_BUFFER, this.vertexData, gl.STATIC_DRAW);
-      if (this.indexData !== undefined) {
-        this.indexBuf = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuf);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, gl.STATIC_DRAW);
-      }
-      this.isInitialized = true;
+    this.vertBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, this.vertexData, gl.STATIC_DRAW);
+    if (this.indexData !== undefined) {
+      this.indexBuf = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuf);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, gl.STATIC_DRAW);
     }
+    this.isInitialized = true;
   }
-  pushVertices(vert) {
-    if (this.vertIndex + vert.length > this.vertexData.length) {
-      console.warn('Vertex array vertex push overflow!');
-      return;
-    }
-    for (let i = 0; i < vert.length; i++) {
-      this.vertexData[this.vertIndex++] = vert[i];
-    }
-  }
-  pushIndex(index) {
-    if (this.indexIndex + index.length > this.indexData.length) {
-      console.warn('Vertex array index push overflow!');
-      return;
-    }
-    for (let i = 0; i < index.length; i++) {
-      this.indexData[this.indexIndex++] = index[i];
-    }
-  }
+
   bind() {
     if (this.isInitialized !== true) {
       console.error('Tried to use uninitialized VertexArray!');
@@ -72,6 +46,7 @@ export default class VertexArray {
       pointer += this.attrs[i];
     }
   }
+
   unbind() {
     for (let i = 0; i < this.attrs.length; i++) {
       gl.disableVertexAttribArray(i);
