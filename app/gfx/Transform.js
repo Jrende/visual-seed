@@ -1,28 +1,33 @@
 import * as glm from 'gl-matrix';
 
-/*
 function calculateModelMatrix(transform) {
   glm.mat4.identity(transform.mat);
 
   glm.mat4.translate(transform.mat, transform.mat, transform.pos);
 
   let rotMat = glm.mat4.create();
-  glm.mat4.fromQuad(rotMat, transform.rotation);
-  glm.mat4.mul(transform.mat, transform.mat, angle);
+  glm.mat4.fromQuat(rotMat, transform.rot);
+  glm.mat4.mul(transform.mat, transform.mat, rotMat);
 
   glm.mat4.scale(transform.mat, transform.mat, transform.scaleValue);
 }
-*/
 
 export default class Transform {
   constructor() {
     this.mat = glm.mat4.create();
+    this.pos = [0, 0, 0];
+    this.scaleValue = [1, 1, 1];
+    this.rot = glm.quat.create();
   }
 
-  setPosition(v) {
-    this.mat[12] = v[0];
-    this.mat[13] = v[1];
-    this.mat[14] = v[2];
+  setPosition(pos) {
+    this.pos = pos;
+    calculateModelMatrix(this); 
+  }
+
+  setScale(scale) {
+    this.scaleValue = scale;
+    calculateModelMatrix(this); 
   }
 
   identity() {
@@ -30,22 +35,22 @@ export default class Transform {
   }
 
   translate(vec3) {
-    glm.mat4.translate(this.mat, this.mat, vec3);
+    this.pos[0] += vec3[0];
+    this.pos[1] += vec3[1];
+    this.pos[2] += vec3[2];
+    calculateModelMatrix(this); 
   }
 
   scale(vec3) {
-    glm.mat4.scale(this.mat, this.mat, vec3);
-  }
-
-  rotateQuat(quat) {
+    this.scaleValue[0] *= vec3[0];
+    this.scaleValue[1] *= vec3[1];
+    this.scaleValue[2] *= vec3[2];
+    calculateModelMatrix(this); 
   }
 
   setRotation(angle, axis) {
-    let quat = glm.quat.create();
-    glm.quat.setAxisAngle(quat, axis, angle);
-    let rotMat = glm.mat4.create();
-    glm.mat4.fromQuat(rotMat, quat);
-    glm.mat4.mul(this.mat, this.mat, rotMat);
+    glm.quat.setAxisAngle(this.rot, axis, angle);
+    calculateModelMatrix(this); 
   }
 
   getModelMatrix() {
