@@ -20,6 +20,10 @@ export default class Transform {
     this.rot = glm.quat.create();
   }
 
+  identity() {
+    this.mat = glm.mat4.create();
+  }
+
   setPosition(pos) {
     this.pos = pos;
     calculateModelMatrix(this); 
@@ -28,10 +32,6 @@ export default class Transform {
   setScale(scale) {
     this.scaleValue = scale;
     calculateModelMatrix(this); 
-  }
-
-  identity() {
-    this.mat = glm.mat4.create();
   }
 
   translate(vec3) {
