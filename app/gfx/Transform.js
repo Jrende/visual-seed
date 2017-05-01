@@ -3,6 +3,7 @@ import * as glm from 'gl-matrix';
 function calculateModelMatrix(transform) {
   glm.mat4.identity(transform.mat);
 
+
   glm.mat4.translate(transform.mat, transform.mat, transform.pos);
 
   let rotMat = glm.mat4.create();
@@ -26,34 +27,54 @@ export default class Transform {
 
   setPosition(pos) {
     this.pos = pos;
-    calculateModelMatrix(this); 
-  }
-
-  setScale(scale) {
-    this.scaleValue = scale;
-    calculateModelMatrix(this); 
+    if(this.pos[2] === undefined) {
+      this.pos[2] = 0;
+    }
+    calculateModelMatrix(this);
   }
 
   translate(vec3) {
     this.pos[0] += vec3[0];
     this.pos[1] += vec3[1];
-    this.pos[2] += vec3[2];
-    calculateModelMatrix(this); 
+    if(vec3[2] !== undefined) {
+      this.pos[2] += vec3[2];
+    }
+    calculateModelMatrix(this);
+  }
+
+  setScale(scale) {
+    this.scaleValue = scale;
+    if(this.scaleValue[2] === undefined) {
+      this.scaleValue[2] = 1;
+    }
+    calculateModelMatrix(this);
   }
 
   scale(vec3) {
     this.scaleValue[0] *= vec3[0];
     this.scaleValue[1] *= vec3[1];
-    this.scaleValue[2] *= vec3[2];
-    calculateModelMatrix(this); 
+    if(vec3[2] !== undefined) {
+      this.scaleValue[2] *= vec3[2];
+    }
+    calculateModelMatrix(this);
   }
 
-  setRotation(angle, axis) {
+  rotate(angle, axis) {
     glm.quat.setAxisAngle(this.rot, axis, angle);
-    calculateModelMatrix(this); 
+    calculateModelMatrix(this);
   }
 
-  getModelMatrix() {
+  setRotationQuat(quat) {
+    this.rot = quat;
+    calculateModelMatrix(this);
+  }
+
+  transform(mat) {
+    //glm.mat4.mul(this.mat, this.mat, mat);
+    glm.mat4.mul(this.mat, mat, this.mat);
+  }
+
+  getMatrix() {
     return this.mat;
   }
 }

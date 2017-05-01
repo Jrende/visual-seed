@@ -1,45 +1,60 @@
 import Transform from './Transform';
 
-updateChildren(world) {
-
-}
-
 export default class World {
   constructor(geometry) {
-    this.transform = new Transform();
+    this.transformValue = new Transform();
     this.geometry = geometry;
     this.children = [];
   }
 
   createChild(geometry) {
-    let newWorld = new World(geometry);
+    let newWorld = new World();
+    geometry.addToWorld(newWorld);
     this.children.push(newWorld);
     return newWorld;
   }
 
   //Maybe autocreate these functions?
-  setPosition(pos) {
-    transform.setPosition(pos);
-    updateChildren(this);
-  }
 
-  setScale(scale) {
-    transform.setScale(scale);
-    updateChildren(this);
+  identity() {
+    this.transformValue.identity();
   }
 
   translate(vec3) {
-    transform.translate(pos);
-    updateChildren(this);
+    this.transformValue.translate(vec3);
+    this.children.forEach(child => child.transform(this.transformValue.mat));
   }
 
   scale(vec3) {
-    transform.setPosition(pos);
-    updateChildren(this);
+    this.transformValue.scale(vec3);
+    this.children.forEach(child => child.transform(this.transformValue.mat));
   }
 
-  setRotation(angle, axis) {
-    transform.setPosition(pos);
-    updateChildren(this);
+  rotate(angle, axis) {
+    this.transformValue.rotate(angle, axis);
+    this.children.forEach(child => child.transform(this.transformValue.mat));
   }
+
+  transform(mat) {
+    this.transformValue.transform(mat);
+    this.children.forEach(child => child.transform(this.transformValue.mat));
+  }
+
+  iterator() {
+    let node = this;
+    return {
+      [Symbol.iterator]: function* () {
+        for(let child of node.children) {
+          yield* child.iterator();
+        }
+        if(node.geometry != null) {
+          yield {
+            vertexArray: node.geometry,
+            modelMatrix: node.transformValue.getMatrix()
+          };
+        }
+      }
+    };
+  }
+
 }
