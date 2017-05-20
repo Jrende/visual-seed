@@ -5,8 +5,7 @@ function calculateModelMatrix(transform) {
 
   glm.mat4.translate(transform.mat, transform.mat, transform.pos);
 
-  let rotMat = glm.mat4.create();
-  glm.mat4.fromQuat(rotMat, transform.rot);
+  let rotMat = glm.mat4.fromQuat(glm.mat4.create(), transform.rot);
   glm.mat4.mul(transform.mat, transform.mat, rotMat);
 
   glm.mat4.scale(transform.mat, transform.mat, transform.scaleValue);
