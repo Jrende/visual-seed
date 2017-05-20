@@ -3,7 +3,6 @@ import * as glm from 'gl-matrix';
 function calculateModelMatrix(transform) {
   glm.mat4.identity(transform.mat);
 
-
   glm.mat4.translate(transform.mat, transform.mat, transform.pos);
 
   let rotMat = glm.mat4.create();

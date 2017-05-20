@@ -32,6 +32,7 @@ class Renderer {
     let prevVertexArray = null;
     gl.clear(gl.COLOR_BUFFER_BIT);
     shader.solid.bind();
+    let i = 0;
     for(let mesh of this.world.iterator()) {
       if(prevVertexArray !== mesh.vertexArray) {
         if(prevVertexArray !== null) {
@@ -50,8 +51,22 @@ class Renderer {
       let modelMat = mesh.modelMatrix;
       glm.mat4.multiply(mvp, vp, modelMat);
 
-      shader.solid.setUniforms({ r: 0.2, g: 0.5, b: 0.1, alpha: 0.1, mvp, modelMat });
+      shader.solid.setUniforms({ alpha: 1.0, mvp, modelMat });
+      if(i % 2 === 0) {
+        shader.solid.setUniforms({
+          r: 0.0,
+          g: 1.0,
+          b: 0.0
+        });
+      } else {
+        shader.solid.setUniforms({
+          r: 1.0,
+          g: 0.0,
+          b: 0.0
+        });
+      }
       gl.drawElements(gl.TRIANGLES, len, gl.UNSIGNED_SHORT, 0);
+      i++;
     }
     prevVertexArray.unbind();
     shader.solid.unbind();

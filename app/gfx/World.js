@@ -1,15 +1,21 @@
 import Transform from './Transform';
+import * as glm from 'gl-matrix';
 
 export default class World {
   constructor(geometry) {
     this.transformValue = new Transform();
+    this.effectiveTransform = new Transform();
     this.geometry = geometry;
     this.children = [];
+    this.parent = null;
   }
 
   createChild(geometry) {
     let newWorld = new World();
-    geometry.addToWorld(newWorld);
+    newWorld.parent = this;
+    if(geometry !== undefined) {
+      geometry.addToWorld(newWorld);
+    }
     this.children.push(newWorld);
     return newWorld;
   }
@@ -18,26 +24,41 @@ export default class World {
 
   identity() {
     this.transformValue.identity();
+    this.update();
   }
 
   translate(vec3) {
     this.transformValue.translate(vec3);
-    this.children.forEach(child => child.transform(this.transformValue.mat));
+    this.update();
   }
 
   scale(vec3) {
     this.transformValue.scale(vec3);
-    this.children.forEach(child => child.transform(this.transformValue.mat));
+    this.update();
   }
 
   rotate(angle, axis) {
     this.transformValue.rotate(angle, axis);
-    this.children.forEach(child => child.transform(this.transformValue.mat));
+    this.update();
   }
 
   transform(mat) {
     this.transformValue.transform(mat);
-    this.children.forEach(child => child.transform(this.transformValue.mat));
+    this.update();
+  }
+
+  update() {
+    let parentTransform = null;
+    if(this.parent == null) {
+      parentTransform = glm.mat4.create();
+    } else {
+      parentTransform = this.parent.effectiveTransform;
+    }
+
+    glm.mat4.mul(this.effectiveTransform.mat, this.transformValue.mat, parentTransform.mat);
+    this.children.forEach(child => {
+      child.update(this.effectiveTransform);
+    });
   }
 
   iterator() {
@@ -50,11 +71,36 @@ export default class World {
         if(node.geometry != null) {
           yield {
             vertexArray: node.geometry,
-            modelMatrix: node.transformValue.getMatrix()
+            modelMatrix: node.effectiveTransform.getMatrix()
           };
         }
       }
     };
   }
 
+  /*
+  standardIterator() {
+    let node = this;
+    let index = 0;
+    let children = this.children.map(child => child.standardIterator());
+    return {
+      next: () => {
+        if(index < node.children.length) {
+          return children[index++].next();
+        }
+        if(node.geometry != null) {
+          return {
+            value: {
+              vertexArray: node.geometry,
+              modelMatrix: node.effectiveTransform.getMatrix()
+            },
+            done: true
+          };
+        }
+
+        return { done: true };
+      }
+    };
+  }
+  */
 }
