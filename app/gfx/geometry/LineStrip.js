@@ -1,9 +1,28 @@
-import * as glm from 'gl-matrix';
+import { vec3 } from 'gl-matrix';
 import Line from './Line';
+import VertexArray from '../VertexArray';
+
+function getJoinTriangle(line, vec, cross, width) {
+  let midpoint = [
+    (line.to[0]+line.from[0]),
+    (line.to[1]+line.from[1]),
+    (line.to[2]+line.from[2])
+  ].map(item => item/2.0);
+
+  let direction = vec3.subtract(vec3.create(), line.to, midpoint);
+  vec3.normalize(direction, direction);
+
+  let normal = vec3.cross(vec3.create(), direction, [0, 0, -cross[2]]);
+  vec3.normalize(normal, normal);
+  vec3.scale(normal, normal, width);
+  vec3.add(vec, vec, normal);
+  return vec;
+}
 
 export default class LineStrip {
   constructor(lines, width = 5) {
     this.lines = [];
+    this.width = width;
     for(let i = 0; i < lines.length - 1; i++) {
       this.lines.push(new Line(lines[i], lines[i + 1], width));
     }
@@ -15,34 +34,33 @@ export default class LineStrip {
       let joinTriangle = [];
       let line1 = this.lines[i];
       let line2 = this.lines[i + 1];
-      let v1 = glm.vec3.create();
-      glm.vec3.subtract(v1, line1.to, line1.from);
-      let v2 = glm.vec3.create();
-      glm.vec3.subtract(v2, line2.from, line2.to);
-      let cross = glm.vec3.create();
-      glm.vec3.cross(cross, v1, v2);
-      glm.vec3.normalize(cross, cross);
+      let v1 = vec3.subtract(vec3.create(), line1.to, line1.from);
+      let v2 = vec3.subtract(vec3.create(), line2.from, line2.to);
+      let cross = vec3.cross(vec3.create(), v1, v2);
+      vec3.normalize(cross, cross);
 
-      {
-        let vec = glm.vec3.clone(line1.to);
-        let normal = glm.vec3.cross(glm.vec3.create(), line1.getDirection(), [0, 0, -cross[2]]);
-        glm.vec3.normalize(normal, normal);
-        glm.vec3.scale(normal, normal, line1.width);
-        glm.vec3.add(vec, vec, normal);
-        joinTriangle.push(vec);
-      }
-      {
-        let vec = glm.vec3.clone(line2.from);
-        let normal = glm.vec3.cross(glm.vec3.create(), line2.getDirection(), [0, 0, -cross[2]]);
-        glm.vec3.normalize(normal, normal);
-        glm.vec3.scale(normal, normal, line1.width);
-        glm.vec3.add(vec, vec, normal);
-        joinTriangle.push(vec);
-      }
-
+      joinTriangle.push(getJoinTriangle(line1, vec3.clone(line1.to), cross, this.width));
+      joinTriangle.push(getJoinTriangle(line2, vec3.clone(line2.from), cross, this.width));
       joinTriangle.push(line1.to);
+
       joins.push(joinTriangle);
     }
     return joins;
+  }
+
+  addToWorld(world, material) {
+    this.lines.forEach(line => {
+      world.createChild(line, material);
+    });
+    this.getJoins().forEach(join => {
+      let arr = join.reduce((acc, val) => {
+        val.forEach((v) => acc.push(v));
+        return acc;
+      }, []);
+      let vertexArray = new VertexArray(arr, [0, 1, 2], [3]);
+      let child = world.createChild();
+      child.material = material;
+      child.geometry = vertexArray;
+    });
   }
 }
