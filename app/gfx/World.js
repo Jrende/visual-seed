@@ -1,5 +1,6 @@
 import Transform from './Transform';
 import * as glm from 'gl-matrix';
+import SolidMaterial from './material/SolidMaterial.js';
 
 export default class World {
   constructor(geometry) {
@@ -10,11 +11,11 @@ export default class World {
     this.parent = null;
   }
 
-  createChild(geometry) {
+  createChild(geometry, material = new SolidMaterial([1.0, 1.0, 1.0])) {
     let newWorld = new World();
     newWorld.parent = this;
     if(geometry !== undefined) {
-      geometry.addToWorld(newWorld);
+      geometry.addToWorld(newWorld, material);
     }
     this.children.push(newWorld);
     return newWorld;
@@ -71,6 +72,7 @@ export default class World {
         if(node.geometry != null) {
           yield {
             vertexArray: node.geometry,
+            material: node.material,
             modelMatrix: node.effectiveTransform.getMatrix()
           };
         }

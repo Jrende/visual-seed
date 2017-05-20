@@ -1,4 +1,3 @@
-import VertexArray from './VertexArray';
 import * as glm from 'gl-matrix';
 import shader from './shader';
 /* global gl */
@@ -30,46 +29,43 @@ class Renderer {
 
   renderScene() {
     let prevVertexArray = null;
+    let prevShader = null;
     gl.clear(gl.COLOR_BUFFER_BIT);
-    shader.solid.bind();
     let i = 0;
-    for(let mesh of this.world.iterator()) {
-      if(prevVertexArray !== mesh.vertexArray) {
+    for(let node of this.world.iterator()) {
+      if(prevShader !== node.material.shader) {
+        if(prevShader !== null) {
+          prevShader.unbind();
+        }
+        prevShader = node.material.shader;
+        prevShader.bind();
+      }
+
+      if(prevVertexArray !== node.vertexArray) {
         if(prevVertexArray !== null) {
           prevVertexArray.unbind();
         }
-        prevVertexArray = mesh.vertexArray;
-        mesh.vertexArray.bind();
+        prevVertexArray = node.vertexArray;
+        node.vertexArray.bind();
       }
 
       let vp = glm.mat4.create();
-      let len = mesh.vertexArray.indexData.length;
+      let len = node.vertexArray.indexData.length;
       glm.mat4.multiply(vp, vp, this.projectionMatrix);
 
       glm.mat4.multiply(vp, vp, this.viewMatrix);
       let mvp = glm.mat4.create();
-      let modelMat = mesh.modelMatrix;
+      let modelMat = node.modelMatrix;
       glm.mat4.multiply(mvp, vp, modelMat);
 
-      shader.solid.setUniforms({ alpha: 1.0, mvp, modelMat });
-      if(i % 2 === 0) {
-        shader.solid.setUniforms({
-          r: 0.0,
-          g: 1.0,
-          b: 0.0
-        });
-      } else {
-        shader.solid.setUniforms({
-          r: 1.0,
-          g: 0.0,
-          b: 0.0
-        });
-      }
+      shader.solid.setUniforms({ mvp, modelMat });
+      node.material.apply();
+
       gl.drawElements(gl.TRIANGLES, len, gl.UNSIGNED_SHORT, 0);
       i++;
     }
     prevVertexArray.unbind();
-    shader.solid.unbind();
+    prevShader.unbind();
   }
 
   drawTexture(texture, opacity=1.0) {

@@ -1,15 +1,6 @@
 precision highp float;
-uniform float alpha;
-uniform float r;
-uniform float g;
-uniform float b;
-
-// uniform float asdasd;
-/*
-uniform vec3 afvjiefjio;
-*/
+uniform vec3 color;
 
 void main(void) {
-  vec4 color = vec4(r, g, b, alpha); 
-  gl_FragColor = color;
+  gl_FragColor = vec4(color, 1.0);;
 }

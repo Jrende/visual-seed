@@ -12,7 +12,7 @@ export default class Line {
     }
   }
 
-  addToWorld(world) {
+  addToWorld(world, material) {
     let midpoint = [
       (this.to[0]+this.from[0]),
       (this.to[1]+this.from[1]),
@@ -27,11 +27,10 @@ export default class Line {
     let angle = -Math.atan(p[0]/p[1]);
 
     let child = world.createChild();
-    child.identity();
+    child.material = material;
     child.geometry = Quad.geometry;
     child.translate(midpoint);
     child.rotate(angle, [0, 0, 1]);
     child.scale([this.width, len/2.0, 1]);
-    return world;
   }
 }

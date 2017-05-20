@@ -11,7 +11,8 @@ class Quad {
       [3]);
   }
 
-  addToWorld(world) {
+  addToWorld(world, material) {
+    world.material = material;
     world.geometry = this.geometry;
   }
 }
