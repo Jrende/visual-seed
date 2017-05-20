@@ -59,7 +59,9 @@ export default class Transform {
   }
 
   rotate(angle, axis) {
-    glm.quat.setAxisAngle(this.rot, axis, angle);
+    let newRot = glm.quat.create();
+    glm.quat.setAxisAngle(newRot, axis, angle);
+    glm.quat.multiply(this.rot, this.rot, newRot);
     calculateModelMatrix(this);
   }
 
