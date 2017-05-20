@@ -26,11 +26,12 @@ export default class Line {
     let len = Math.sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]);
     let angle = -Math.atan(p[0]/p[1]);
 
-    world.identity();
-    world.geometry = Quad.geometry;
-    world.translate(midpoint);
-    world.rotate(angle, [0, 0, 1]);
-    world.scale([this.width, len/2.0, 1]);
+    let child = world.createChild();
+    child.identity();
+    child.geometry = Quad.geometry;
+    child.translate(midpoint);
+    child.rotate(angle, [0, 0, 1]);
+    child.scale([this.width, len/2.0, 1]);
     return world;
   }
 }
