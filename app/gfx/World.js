@@ -51,7 +51,9 @@ export default class World {
   update() {
     let parentTransform = null;
     if(this.parent == null) {
-      parentTransform = glm.mat4.create();
+      parentTransform = {
+        mat: glm.mat4.create()
+      };
     } else {
       parentTransform = this.parent.effectiveTransform;
     }
