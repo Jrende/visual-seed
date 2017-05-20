@@ -54,9 +54,8 @@ class Renderer {
       glm.mat4.multiply(vp, vp, this.projectionMatrix);
 
       glm.mat4.multiply(vp, vp, this.viewMatrix);
-      let mvp = glm.mat4.create();
       let modelMat = node.modelMatrix;
-      glm.mat4.multiply(mvp, vp, modelMat);
+      let mvp = glm.mat4.multiply(glm.mat4.create(), vp, modelMat);
 
       shader.solid.setUniforms({ mvp, modelMat });
       node.material.apply();
