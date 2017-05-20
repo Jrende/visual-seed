@@ -55,7 +55,7 @@ export default class World {
       parentTransform = this.parent.effectiveTransform;
     }
 
-    glm.mat4.mul(this.effectiveTransform.mat, this.transformValue.mat, parentTransform.mat);
+    glm.mat4.mul(this.effectiveTransform.mat, parentTransform.mat, this.transformValue.mat);
     this.children.forEach(child => {
       child.update(this.effectiveTransform);
     });
