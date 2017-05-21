@@ -50,7 +50,6 @@ class Renderer {
       }
 
       let vp = glm.mat4.create();
-      let len = node.vertexArray.indexData.length;
       glm.mat4.multiply(vp, vp, this.projectionMatrix);
 
       glm.mat4.multiply(vp, vp, this.viewMatrix);
@@ -60,7 +59,7 @@ class Renderer {
       shader.solid.setUniforms({ mvp, modelMat });
       node.material.apply();
 
-      gl.drawElements(gl.TRIANGLES, len, gl.UNSIGNED_SHORT, 0);
+      node.vertexArray.draw();
       i++;
     }
     prevVertexArray.unbind();

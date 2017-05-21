@@ -1,6 +1,6 @@
 /* globals gl */
 export default class VertexArray {
-  constructor(vertexData, indexData, attrs) {
+  constructor(vertexData, indexData, attrs, drawMode = gl.TRIANGLES) {
     if (vertexData instanceof Float32Array) {
       this.vertexData = vertexData;
     } else {
@@ -13,6 +13,7 @@ export default class VertexArray {
       this.indexData = new Uint16Array(indexData);
     }
 
+    this.drawMode = drawMode;
     this.attrs = attrs;
     this.initialize();
   }
@@ -45,6 +46,10 @@ export default class VertexArray {
       gl.enableVertexAttribArray(i);
       pointer += this.attrs[i];
     }
+  }
+
+  draw() {
+    gl.drawElements(this.drawMode, this.indexData.length, gl.UNSIGNED_SHORT, 0);
   }
 
   unbind() {
