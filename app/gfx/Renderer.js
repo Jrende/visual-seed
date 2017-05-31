@@ -15,7 +15,8 @@ class Renderer {
 
     this.width = width;
     this.height = height;
-    gl.disable(gl.CULL_FACE);
+    //gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
   }
 
