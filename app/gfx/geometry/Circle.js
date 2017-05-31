@@ -1,31 +1,36 @@
 import VertexArray from '../VertexArray';
 /* global gl */
-export default class Line {
-  constructor(pos, radius = 5, points = 6) {
-    this.pos = pos;
-    this.radius = radius;
-    this.points = points;
 
-    this.generateGeometry();
+let circleGeometries = {};
+function generateGeometry(numPoints) {
+  if(circleGeometries[numPoints] !== undefined) {
+    return circleGeometries[numPoints];
   }
 
-  generateGeometry() {
-    let points = [0, 0, 0];
-    let indices = [];
-    for(let i = 0; i < this.points + 1; i++) {
-      points.push(Math.sin((2 * Math.PI / this.points) * i) * this.radius);
-      points.push(Math.cos((2 * Math.PI / this.points) * i) * this.radius);
-      points.push(0);
-      indices.push(i);
-    }
-    indices.push(1);
-    this.vertexArray = new VertexArray(points, indices, [3], gl.TRIANGLE_FAN);
+  let points = [0, 0, 0];
+  let indices = [];
+  for(let i = 0; i < numPoints + 1; i++) {
+    points.push(Math.sin((2 * Math.PI / numPoints) * i));
+    points.push(Math.cos((2 * Math.PI / numPoints) * i));
+    points.push(0);
+    indices.push(i);
+  }
+  indices.push(1);
+  let circle = new VertexArray(points, indices, [3], gl.TRIANGLE_FAN);
+  circleGeometries[numPoints] = circle;
+  return circle;
+}
+
+export default class Line {
+  constructor(points = 6) {
+    this.points = points;
+
+    this.vertexArray = generateGeometry(points);
   }
 
   addToWorld(world, material) {
     let child = world.createChild();
     child.material = material;
     child.geometry = this.vertexArray;
-    child.translate(this.pos);
   }
 }
