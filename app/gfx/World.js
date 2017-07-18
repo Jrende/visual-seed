@@ -26,26 +26,31 @@ export default class World {
   identity() {
     this.transformValue.identity();
     this.update();
+    return this;
   }
 
   translate(vec3) {
     this.transformValue.translate(vec3);
     this.update();
+    return this;
   }
 
   scale(vec3) {
     this.transformValue.scale(vec3);
     this.update();
+    return this;
   }
 
   rotate(angle, axis) {
     this.transformValue.rotate(angle, axis);
     this.update();
+    return this;
   }
 
   transform(mat) {
     this.transformValue.transform(mat);
     this.update();
+    return this;
   }
 
   update() {
