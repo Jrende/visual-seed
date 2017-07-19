@@ -17,6 +17,8 @@ class Renderer {
     this.height = height;
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
     gl.cullFace(gl.BACK);
   }
 

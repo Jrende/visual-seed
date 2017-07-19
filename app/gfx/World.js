@@ -86,30 +86,4 @@ export default class World {
       }
     };
   }
-
-  /*
-  standardIterator() {
-    let node = this;
-    let index = 0;
-    let children = this.children.map(child => child.standardIterator());
-    return {
-      next: () => {
-        if(index < node.children.length) {
-          return children[index++].next();
-        }
-        if(node.geometry != null) {
-          return {
-            value: {
-              vertexArray: node.geometry,
-              modelMatrix: node.effectiveTransform.getMatrix()
-            },
-            done: true
-          };
-        }
-
-        return { done: true };
-      }
-    };
-  }
-  */
 }

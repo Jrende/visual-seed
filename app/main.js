@@ -26,22 +26,6 @@ let color = tinycolor2("red")
 
 let p = 5;
 
-let tris = world.createChild();
-tris.translate([-200, -200, 0]);
-for(let i = 0; i < p; i++) {
-  for(let j = 0; j < p; j++) {
-    let iStep = i*512/p;
-    let jStep = j*512/p;
-    let c = color.clone()
-      .spin((jStep + iStep / 800.0) / Math.PI * 180);
-    let rot = (i % 2) == 0 ? Math.PI : 0;
-    tris.createChild(tri, new SolidMaterial(toArray(c)))
-      .translate([iStep, jStep, 0])
-      .scale([50, 50, 1])
-      .rotate(rot, [0, 0, 1]);
-  }
-}
-
 let bgTris = world.createChild();
 bgTris.translate([-200, -200, 0]);
 console.log("here");
@@ -60,6 +44,22 @@ for(let i = 0; i < p; i++) {
       .translate([iStep, jStep, -1])
       .scale([100, 100, 1])
       .rotate(Math.PI, [0, 0, 1]);
+  }
+}
+
+let tris = world.createChild();
+tris.translate([-200, -200, 0]);
+for(let i = 0; i < p; i++) {
+  for(let j = 0; j < p; j++) {
+    let iStep = i*512/p;
+    let jStep = j*512/p;
+    let c = color.clone()
+      .spin((jStep + iStep / 800.0) / Math.PI * 180);
+    let rot = (i % 2) == 0 ? Math.PI : 0;
+    tris.createChild(tri, new SolidMaterial([...toArray(c), 0.2]))
+      .translate([iStep, jStep, 0])
+      .scale([50, 50, 1])
+      .rotate(rot, [0, 0, 1]);
   }
 }
 
