@@ -1,7 +1,9 @@
 import shaders from '../shader';
+import Material from './Material';
 
-export default class SolidMaterial {
+export default class SolidMaterial extends Material {
   constructor(color) {
+    super();
     this.shader = shaders.solid;
     this.color = color;
     if(color[3] === undefined) {
@@ -13,6 +15,10 @@ export default class SolidMaterial {
     this.shader.setUniforms({
       color: this.color
     });
+  }
+
+  isTransparent() {
+    return this.color[3] < 1.0;
   }
 }
 

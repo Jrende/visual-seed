@@ -14,8 +14,8 @@
     }
   },
   "dependencies": {
-    "babel-polyfill": "^6.23.0",
     "gl-matrix": "^2.3.2",
+    "babel-polyfill": "^6.23.0",
     "tinycolor2": "^1.4.1"
   },
   "scripts": {

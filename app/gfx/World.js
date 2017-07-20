@@ -3,22 +3,35 @@ import * as glm from 'gl-matrix';
 import SolidMaterial from './material/SolidMaterial.js';
 
 export default class World {
-  constructor(geometry) {
+  constructor(geometry, renderList = { opaque: [], transparent: [] }) {
     this.transformValue = new Transform();
     this.effectiveTransform = new Transform();
     this.geometry = geometry;
     this.children = [];
     this.parent = null;
+    this.camera = null;
+    this.renderList = renderList;
+    this.update();
   }
 
   createChild(geometry, material = new SolidMaterial([1.0, 1.0, 1.0])) {
-    let newWorld = new World();
+    let newWorld = new World(undefined, this.renderList);
     newWorld.parent = this;
+    newWorld.camera = this.camera;
     if(geometry !== undefined) {
       geometry.addToWorld(newWorld, material);
+      
+      //Won't work, need to update every frame
+      let newDrawObjs = newWorld.getChildren();
+      newDrawObjs.opaque.forEach(node => this.renderList.opaque.push(node))
+      newDrawObjs.transparent.forEach(node => this.renderList.transparent.push(node));
     }
     this.children.push(newWorld);
     return newWorld;
+  }
+ 
+  setCamera(camera) {
+    this.camera = camera;
   }
 
   //Maybe autocreate these functions?
@@ -69,21 +82,20 @@ export default class World {
     });
   }
 
-  iterator() {
-    let node = this;
-    return {
-      [Symbol.iterator]: function* () {
-        for(let child of node.children) {
-          yield* child.iterator();
-        }
-        if(node.geometry != null) {
-          yield {
-            vertexArray: node.geometry,
-            material: node.material,
-            modelMatrix: node.effectiveTransform.getMatrix()
-          };
-        }
+  getChildren(opaque = [], transparent = []) {
+    this.children.forEach(node => {
+      node.getChildren(opaque, transparent);
+      if(node.geometry != null) {
+        let obj = {
+          vertexArray: node.geometry,
+          material: node.material,
+          modelMatrix: node.effectiveTransform
+        };
+        node.material.isTransparent() ?
+          transparent.push(obj)
+          : opaque.push(obj);
       }
-    };
+    });
+    return { opaque, transparent };
   }
 }
