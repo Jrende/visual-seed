@@ -16,9 +16,9 @@ let world = new World();
 let w = gl.canvas.width;
 let h = gl.canvas.height;
 let tri = new Triangles([
-  [-1, 0, 0],
-  [0, 1.5, 0],
-  [1, 0, 0],
+  [-1, -0.5, 0],
+  [0, 1.0, 0],
+  [1, -0.5, 0],
 ]);
 let color = tinycolor2("red")
   .spin(Math.random() * 360)
@@ -27,25 +27,29 @@ let color = tinycolor2("red")
 let p = 5;
 
 let tris = world.createChild()
-  .scale([50, 50, 1]);
+  .scale([50, 50, 1])
 
 tris.createChild(tri, new SolidMaterial([1, 1, 1, 1.0]))
   .translate([0, -0.575, 1])
-  .scale([2, 2, 1]);
+  .scale([2, 2, 1])
 
-tris.createChild(tri, new SolidMaterial([0, 1, 0, 0.8]))
-  .translate([0.5, 0, 5]);
+let a = tris.createChild(tri, new SolidMaterial([1, 0, 0, 0.6]))
+  .translate([-0.5, 0, 5])
 
-tris.createChild(tri, new SolidMaterial([0, 0, 1, 0.8]))
-  .translate([0, -0.5, 10]);
+let b = tris.createChild(tri, new SolidMaterial([0, 0, 1, 0.6]))
+  .translate([0, -0.5, 15]);
 
-tris.createChild(tri, new SolidMaterial([1, 0, 0, 0.8]))
-  .translate([-0.5, 0, 15]);
+let c = tris.createChild(tri, new SolidMaterial([0, 1, 0, 0.6]))
+  .translate([0.5, 0, 10]);
 
 let renderer = new Renderer();
 renderer.setWorld(world);
+let i = 0;
 function render() {
   window.requestAnimationFrame(render);
+  a.rotate(0.01, [0, 0, 1]);
+  b.rotate(-0.01, [0, 0, 1]);
+  c.rotate(0.01, [0, 0, 1]);
   renderer.render();
 }
 

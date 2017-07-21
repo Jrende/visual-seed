@@ -31,6 +31,15 @@ export default class Transform {
     calculateModelMatrix(this);
   }
 
+  getPosition() {
+    return [
+      this.mat[12],
+      this.mat[13],
+      this.mat[14]
+    ];
+  }
+
+  //How does this interact with changing matrices from World?
   translate(vec3) {
     this.pos[0] += vec3[0];
     this.pos[1] += vec3[1];

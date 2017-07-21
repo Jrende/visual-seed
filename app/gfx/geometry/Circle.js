@@ -21,7 +21,7 @@ function generateGeometry(numPoints) {
   return circle;
 }
 
-export default class Line {
+export default class Circle {
   constructor(points = 6) {
     this.points = points;
 

@@ -38,7 +38,25 @@ class Renderer {
     let prevShader = null;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     let c = this.world.renderList;
-    let nodes = [...c.transparent, ...c.opaque];
+    let viewPos = [
+      this.viewMatrix[12],
+      this.viewMatrix[13],
+      this.viewMatrix[14]
+    ];
+
+    c.opaque.sort((a, b) => {
+      let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
+      let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
+      return d2 - d1;
+    });
+
+    c.transparent.sort((a, b) => {
+      let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
+      let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
+      return d1 - d2;
+    });
+
+    let nodes = [...c.opaque, ...c.transparent];
     for(let i = 0; i < nodes.length; i++) {
       let node = nodes[i];
       if(prevShader !== node.material.shader) {
@@ -61,7 +79,7 @@ class Renderer {
       glm.mat4.multiply(vp, vp, this.projectionMatrix);
 
       glm.mat4.multiply(vp, vp, this.viewMatrix);
-      let modelMat = node.modelMatrix.getMatrix();
+      let modelMat = node.transform.getMatrix();
       let mvp = glm.mat4.multiply(glm.mat4.create(), vp, modelMat);
 
       shader.solid.setUniforms({ mvp, modelMat });

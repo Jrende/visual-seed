@@ -11,7 +11,6 @@ export default class World {
     this.parent = null;
     this.camera = null;
     this.renderList = renderList;
-    this.update();
   }
 
   createChild(geometry, material = new SolidMaterial([1.0, 1.0, 1.0])) {
@@ -21,20 +20,21 @@ export default class World {
     if(geometry !== undefined) {
       geometry.addToWorld(newWorld, material);
       
-      //Won't work, need to update every frame
+      //Won't work with moving camera, would need to update every frame
       let newDrawObjs = newWorld.getChildren();
       newDrawObjs.opaque.forEach(node => this.renderList.opaque.push(node))
       newDrawObjs.transparent.forEach(node => this.renderList.transparent.push(node));
     }
     this.children.push(newWorld);
+    newWorld.update();
     return newWorld;
-  }
- 
-  setCamera(camera) {
-    this.camera = camera;
   }
 
   //Maybe autocreate these functions?
+  
+  getPosition() {
+    return this.effectiveTransform.pos;
+  }
 
   identity() {
     this.transformValue.identity();
@@ -89,7 +89,7 @@ export default class World {
         let obj = {
           vertexArray: node.geometry,
           material: node.material,
-          modelMatrix: node.effectiveTransform
+          transform: node.effectiveTransform
         };
         node.material.isTransparent() ?
           transparent.push(obj)
