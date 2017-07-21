@@ -9,12 +9,13 @@ class Renderer {
     let [width, height] = [gl.canvas.width, gl.canvas.height];
     gl.clearColor(0, 0, 0, 1);
 
+    /*
     glm.mat4.translate(this.viewMatrix, this.viewMatrix, [0, 0, -100]);
     glm.mat4.ortho(this.projectionMatrix, width/2, -width/2, -height/2, height/2, 0.1, 100);
-    /*
-    glm.mat4.perspective(this.projectionMatrix, 90, width/height, 0.1, 100);
-    glm.mat4.lookAt(this.viewMatrix, [20, -90, 0], [0, 0, 0], [0, 1, 0]);
     */
+
+    glm.mat4.perspective(this.projectionMatrix, 100, width/height, 0.1, 1000);
+    glm.mat4.lookAt(this.viewMatrix, [0, 0, 600], [0, 0, 0], [0, 1, 0]);
 
     this.width = width;
     this.height = height;

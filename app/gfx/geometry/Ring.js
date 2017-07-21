@@ -20,7 +20,6 @@ function generateGeometry(numPoints, innerRadius) {
       points.push(Math.cos(rad) * innerRadius + justify[1]);
     }
     points.push(0);
-    console.log(`rad: ${radToDeg(rad)}`);
   }
 
   for(let i = 0; i < numPoints; i++) {
