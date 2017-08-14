@@ -155,7 +155,9 @@ export default class Shader {
         return;
       }
       //TODO: add validation, compare value type to uniform type etc.
-      setUniform(uniform.handle, uniform.type, value.value);
+      if(uniform.handle != null) {
+        setUniform(uniform.handle, uniform.type, value.value);
+      }
     });
   }
 
