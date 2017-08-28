@@ -1,6 +1,6 @@
-import Transform from './Transform';
 import * as glm from 'gl-matrix';
-import SolidMaterial from './material/SolidMaterial.js';
+import Transform from './Transform';
+import SolidMaterial from './material/SolidMaterial';
 
 export default class World {
   constructor(geometry, renderList = { opaque: [], transparent: [] }) {
@@ -19,10 +19,9 @@ export default class World {
     newWorld.camera = this.camera;
     if(geometry !== undefined) {
       geometry.addToWorld(newWorld, material);
-      
       //Won't work with moving camera, would need to update every frame
       let newDrawObjs = newWorld.getChildren();
-      newDrawObjs.opaque.forEach(node => this.renderList.opaque.push(node))
+      newDrawObjs.opaque.forEach(node => this.renderList.opaque.push(node));
       newDrawObjs.transparent.forEach(node => this.renderList.transparent.push(node));
     }
     this.children.push(newWorld);
@@ -31,7 +30,6 @@ export default class World {
   }
 
   //Maybe autocreate these functions?
-  
   getPosition() {
     return this.effectiveTransform.pos;
   }
@@ -77,13 +75,11 @@ export default class World {
     }
 
     glm.mat4.mul(this.effectiveTransform.mat, parentTransform.mat, this.transformValue.mat);
-    this.children.forEach(child => {
-      child.update(this.effectiveTransform);
-    });
+    this.children.forEach(child => child.update(this.effectiveTransform));
   }
 
   getChildren(opaque = [], transparent = []) {
-    this.children.forEach(node => {
+    this.children.forEach((node) => {
       node.getChildren(opaque, transparent);
       if(node.geometry != null) {
         let obj = {
@@ -91,9 +87,11 @@ export default class World {
           material: node.material,
           transform: node.effectiveTransform
         };
-        node.material.isTransparent() ?
-          transparent.push(obj)
-          : opaque.push(obj);
+        if(node.material.isTransparent()) {
+          transparent.push(obj);
+        } else {
+          opaque.push(obj);
+        }
       }
     });
     return { opaque, transparent };

@@ -1,5 +1,6 @@
 let path = require('path');
 let HtmlWebpackPlugin = require('html-webpack-plugin');
+let CopyWebpackPlugin = require('copy-webpack-plugin');
 
 let app = path.join(__dirname, 'app/main');
 let dist = path.join(__dirname, 'dist');
@@ -13,7 +14,7 @@ module.exports = {
   output: {
     path: dist,
     filename: '[name].js',
-    publicPath: '/dist'
+    publicPath: '/'
   },
   resolve: {
     extensions: ['.js']
@@ -22,7 +23,13 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: index,
       inject: false
-    })
+    }),
+    new CopyWebpackPlugin([
+      {
+        from: 'app/init.js',
+        to: ''
+      }
+    ]),
   ],
   module: {
     rules: [

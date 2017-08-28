@@ -3,7 +3,7 @@ let context = canvas.getContext('webgl', {
   antialias: true,
   depth: true,
   premultipliedAlpha: true,
-  preserveDrawingBuffer: true,
+  preserveDrawingBuffer: false,
   alpha: true
 });
 if(context == null) {
