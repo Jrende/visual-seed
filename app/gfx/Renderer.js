@@ -6,19 +6,20 @@ class Renderer {
     this.viewMatrix = glm.mat4.create();
     this.projectionMatrix = glm.mat4.create();
 
-    let [width, height] = [gl.canvas.width, gl.canvas.height];
     gl.clearColor(0, 0, 0, 1);
+    let [w, h] = [gl.canvas.width, gl.canvas.height];
+    this.viewMatrix = glm.mat4.create();
 
-    /*
-    glm.mat4.translate(this.viewMatrix, this.viewMatrix, [0, 0, -100]);
-    glm.mat4.ortho(this.projectionMatrix, width/2, -width/2, -height/2, height/2, 0.1, 100);
-    */
-
-    glm.mat4.perspective(this.projectionMatrix, 100, width/height, 0.1, 1000);
+    this.projectionMatrix = glm.mat4.create();
+    glm.mat4.perspective(
+      this.projectionMatrix,
+      100,
+      h / w,
+      0.1,
+      1000);
     glm.mat4.lookAt(this.viewMatrix, [0, 0, 600], [0, 0, 0], [0, 1, 0]);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-    this.width = width;
-    this.height = height;
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -36,6 +37,10 @@ class Renderer {
   }
 
   renderScene() {
+    let aspectX = gl.canvas.clientWidth;
+    let aspectY = gl.canvas.clientHeight;
+    let aspectRatio = aspectX / aspectY;
+
     let prevVertexArray = null;
     let prevShader = null;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -84,7 +89,11 @@ class Renderer {
       let modelMat = node.transform.getMatrix();
       let mvp = glm.mat4.multiply(glm.mat4.create(), vp, modelMat);
 
-      shader.solid.setUniforms({ mvp, modelMat });
+      shader.solid.setUniforms({
+        mvp,
+        modelMat,
+        aspectRatio
+      });
       node.material.apply();
 
       node.vertexArray.draw();
@@ -105,5 +114,8 @@ class Renderer {
     shader.texture.unbind();
   }
 
+  static setBackgroundColor(color) {
+    gl.clearColor(color[0], color[1], color[2], 1);
+  }
 }
 export default Renderer;

@@ -2,7 +2,7 @@ let path = require('path');
 let HtmlWebpackPlugin = require('html-webpack-plugin');
 let CopyWebpackPlugin = require('copy-webpack-plugin');
 
-let app = path.join(__dirname, 'app/main');
+let app = path.join(__dirname, 'app/main.js');
 let dist = path.join(__dirname, 'dist');
 let index = path.join(__dirname, 'index.html');
 

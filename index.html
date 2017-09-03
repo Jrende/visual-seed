@@ -12,11 +12,8 @@
 
 </head>
 <style>
-canvas {
-  margin-left: auto;
-  margin-right: auto;
-}
 body {
+  overflow: hidden;
   margin: 0;
   padding: 0;
 }
@@ -33,32 +30,20 @@ audio {
   left: 0;
 }
 
-  .horiz {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    height: 100vw;
-  }
+canvas {
+  height: 100vh;
+  width: 100vw;
+}
 
-  .vert {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-  }
 </style>
 <body>
-  <div class="horiz">
-    <div class="vert">
-      <canvas id="canvas" width="512" height="512"></canvas>
-    </div>
-  </div>
+  <canvas id="canvas" width="4096" height="4096"></canvas>
   <img src="Speaker_Icon.svg" id="mute">
   <audio controls loop autoplay>
   </audio>
 
-  <script src="/dist/init.js"></script>
-  <script src="/dist/app.js"></script>
+  <script src="/init.js"></script>
+  <script src="/app.js"></script>
   <script>
 var vid = document.getElementsByTagName("audio")[0];
 vid.volume = 0.5;

@@ -1,6 +1,6 @@
 let canvas = document.querySelector('canvas');
 let context = canvas.getContext('webgl', {
-  antialias: true,
+  antialias: false,
   depth: true,
   premultipliedAlpha: true,
   preserveDrawingBuffer: false,

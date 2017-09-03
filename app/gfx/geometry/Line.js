@@ -1,4 +1,5 @@
 import Quad from './Quad';
+
 export default class Line {
   constructor(from, to, width = 5) {
     this.from = from;
