@@ -2,7 +2,7 @@ let path = require('path');
 let HtmlWebpackPlugin = require('html-webpack-plugin');
 let CopyWebpackPlugin = require('copy-webpack-plugin');
 
-let app = path.join(__dirname, 'app/main.js');
+let app = path.join(__dirname, 'src/main.js');
 let dist = path.join(__dirname, 'dist');
 let index = path.join(__dirname, 'index.html');
 
@@ -26,7 +26,7 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       {
-        from: 'app/init.js',
+        from: 'src/init.js',
         to: ''
       }
     ]),

@@ -19,6 +19,8 @@
     "no-param-reassign": "off",
     "keyword-spacing": "off",
     "react/jsx-no-bind": "off",
-    "space-infix-ops": "off"
+    "space-infix-ops": "off",
+    "no-restricted-properties": "off",
+    "class-methods-use-this": "off"
   }
 }
