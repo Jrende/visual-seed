@@ -73,15 +73,9 @@ class Renderer {
 
     let nodes = [...c.opaque, ...c.transparent];
 
-    let blurAmount = 1.5;
+    let blurAmount = 0.0;
     this.presentationBuffer.renderTo(() => {
       this.renderScene(nodes);
-    }).renderTo(() => {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      this.blur(this.presentationBuffer.getTexture(), [0, 1], blurAmount);
-    }).renderTo(() => {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-      this.blur(this.presentationBuffer.getTexture(), [1, 0], blurAmount);
     });
     this.present();
   }
