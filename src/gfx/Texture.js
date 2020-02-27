@@ -1,4 +1,4 @@
-/* global gl */
+/* global gl, Image */
 export default class Texture {
   constructor(path) {
     this.image = new Image();
@@ -13,7 +13,9 @@ export default class Texture {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
       gl.generateMipmap(gl.TEXTURE_2D);
       gl.bindTexture(gl.TEXTURE_2D, null);
+      console.log('Loaded ', this.src);
     });
+    this.image.src = this.src;
   }
   bind(unit) {
     gl.activeTexture(gl.TEXTURE0 + unit);

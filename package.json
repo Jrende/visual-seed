@@ -14,8 +14,9 @@
     }
   },
   "dependencies": {
-    "gl-matrix": "^2.3.2",
-    "babel-polyfill": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "bezier-js": "^2.5.1",
+    "gl-matrix": "^3.2.1",
     "tinycolor2": "^1.4.1"
   },
   "scripts": {
@@ -23,23 +24,24 @@
     "build": "node_modules/.bin/webpack"
   },
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.3.1",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "copy-webpack-plugin": "^4.6.0",
-    "eslint": "^3.17.1",
-    "eslint-config-airbnb": "^14.1.0",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-jsx-a11y": "^4.0.0",
-    "eslint-plugin-react": "^6.10.0",
+    "@babel/core": "^7.8.6",
+    "@babel/preset-env": "^7.8.6",
+    "@babel/preset-react": "^7.8.3",
+    "babel-loader": "^8.0.6",
+    "copy-webpack-plugin": "^5.1.1",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.18.3",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
-    "glsl-parser": "^2.0.0",
+    "file-loader": "^5.1.0",
+    "glsl-parser": "^2.0.1",
     "html-webpack-plugin": "3.2.0",
-    "raw-loader": "1.0.0",
-    "uglifyjs-webpack-plugin": "^2.1.1",
-    "webpack": "4.29.0",
-    "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14"
+    "raw-loader": "4.0.0",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   }
 }

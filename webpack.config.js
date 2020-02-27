@@ -26,7 +26,7 @@ module.exports = {
     }),
     */
     extractLess,
-    new CopyWebpackPlugin([ './src/init.js' ])
+    new CopyWebpackPlugin(['./src/init.js'])
   ],
   module: {
     rules: [
@@ -64,6 +64,14 @@ module.exports = {
           ]
         })
       },
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+          },
+        ],
+      }
     ]
   }
 };

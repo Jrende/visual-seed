@@ -49,12 +49,10 @@ export default class LineStrip {
   }
 
   addToWorld(world, material) {
-    this.lines.forEach(line => {
-      world.createChild(line, material);
-    });
-    this.getJoins().forEach(join => {
+    this.lines.forEach(line => world.createChild(line, material));
+    this.getJoins().forEach((join) => {
       let arr = join.reduce((acc, val) => {
-        val.forEach((v) => acc.push(v));
+        val.forEach(v => acc.push(v));
         return acc;
       }, []);
       let vertexArray = new VertexArray(arr, [0, 1, 2], [3]);

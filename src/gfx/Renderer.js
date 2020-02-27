@@ -24,7 +24,8 @@ class Renderer {
       100,
       h / w,
       0.1,
-      1000);
+      1000
+    );
     glm.mat4.lookAt(this.viewMatrix, [0, 0, 600], [0, 0, 0], [0, 1, 0]);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     this.presentationBuffer = new Doublebuffer(gl.canvas.width, gl.canvas.height, false, true);
@@ -59,21 +60,25 @@ class Renderer {
     ];
 
     let c = this.world.renderList;
-    c.opaque.sort((a, b) => {
-      let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
-      let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
-      return d2 - d1;
-    });
+    let nodes = c.opaque;
+    if(c.transparent.length !== 0) {
+      c.opaque.sort((a, b) => {
+        //let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
+        //let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
+        return a.transform.getPosition()[2] - b.transform.getPosition()[2];
+        //return d2 - d1;
+      });
 
-    c.transparent.sort((a, b) => {
-      let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
-      let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
-      return d1 - d2;
-    });
+      c.transparent.sort((a, b) => {
+        //let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
+        //let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
+        return a.transform.getPosition()[2] - b.transform.getPosition()[2];
+        //return d2 - d1;
+      });
 
-    let nodes = [...c.opaque, ...c.transparent];
+      nodes = [...c.opaque, ...c.transparent];
+    }
 
-    let blurAmount = 0.0;
     this.presentationBuffer.renderTo(() => {
       this.renderScene(nodes);
     });
@@ -143,13 +148,13 @@ class Renderer {
       glm.mat4.multiply(vp, vp, this.viewMatrix);
       let modelMat = node.transform.getMatrix();
       let mvp = glm.mat4.multiply(glm.mat4.create(), vp, modelMat);
+      node.material.apply();
 
-      shader.solid.setUniforms({
+      node.material.shader.setUniforms({
         mvp,
         modelMat,
         aspectRatio: this.aspectRatio
       });
-      node.material.apply();
 
       node.vertexArray.draw();
     }
@@ -158,6 +163,14 @@ class Renderer {
   }
 
   static setBackgroundColor(color) {
+    if(color.toRgb !== undefined) {
+      let rgb = color.toRgb();
+      color = [
+        rgb.r / 255,
+        rgb.g / 255,
+        rgb.b / 255
+      ];
+    }
     gl.clearColor(color[0], color[1], color[2], 1);
   }
 }

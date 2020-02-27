@@ -21,6 +21,7 @@
     "react/jsx-no-bind": "off",
     "space-infix-ops": "off",
     "no-restricted-properties": "off",
-    "class-methods-use-this": "off"
+    "class-methods-use-this": "off",
+    "function-paren-newline": "off"
   }
 }

@@ -47,6 +47,9 @@ export default class World {
   }
 
   scale(vec3) {
+    if(!isNaN(vec3)) {
+      vec3 = [vec3, vec3, vec3];
+    }
     this.transformValue.scale(vec3);
     this.update();
     return this;

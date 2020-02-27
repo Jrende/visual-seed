@@ -9,7 +9,6 @@ export default class SolidMaterial extends Material {
     if(color[3] === undefined) {
       color[3] = 1.0;
     } else {
-      //Should I premultiply alpha here, or in shader?
       color[0] *= color[3];
       color[1] *= color[3];
       color[2] *= color[3];
