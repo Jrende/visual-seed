@@ -1,5 +1,5 @@
 import * as glm from 'gl-matrix';
-import shader from './shader';
+import getShader from './shader';
 import { Doublebuffer } from './Framebuffer';
 import VertexArray from './VertexArray';
 /* global gl, window */
@@ -46,20 +46,18 @@ class Renderer {
       [1, 0, 2,
         2, 0, 3],
       [3]);
+
+    this.textureShader = getShader('texture');
   }
 
-  setWorld(world) {
-    this.world = world;
-  }
-
-  render() {
+  render(world) {
     let viewPos = [
       this.viewMatrix[12],
       this.viewMatrix[13],
       this.viewMatrix[14]
     ];
 
-    let c = this.world.renderList;
+    let c = world.renderList;
     let nodes = c.opaque;
     if(c.transparent.length !== 0) {
       c.opaque.sort((a, b) => {
@@ -90,34 +88,15 @@ class Renderer {
     this.drawTexture(this.presentationBuffer.getTexture());
   }
 
-  blur(texture, dir, radius, color = [1, 1, 1]) {
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    shader.blur.bind();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    shader.blur.setUniforms({
-      texture: 0,
-      resolution: this.width,
-      radius,
-      dir,
-      color
-    });
-
-    this.quad.bind();
-    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    this.quad.unbind();
-    shader.blur.unbind();
-  }
-
   drawTexture(texture) {
-    shader.texture.bind();
+    this.textureShader.bind();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    shader.texture.setUniforms({ sampler: 0, opacity: 1.0 });
+    this.textureShader.setUniforms({ sampler: 0, opacity: 1.0 });
     this.quad.bind();
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     this.quad.unbind();
-    shader.texture.unbind();
+    this.textureShader.unbind();
   }
 
   renderScene(renderlist) {

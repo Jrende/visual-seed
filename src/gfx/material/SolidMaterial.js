@@ -1,10 +1,10 @@
-import shaders from '../shader';
+import getShader from '../shader';
 import Material from './Material';
 
 export default class SolidMaterial extends Material {
   constructor(color) {
     super();
-    this.shader = shaders.solid;
+    this.shader = getShader('solid');
     this.color = color;
     if(color[3] === undefined) {
       color[3] = 1.0;

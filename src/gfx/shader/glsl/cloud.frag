@@ -152,6 +152,8 @@ float fbm(vec2 P, int octaves, float lacunarity, float gain) {
 
 void main() {
   vec2 q = gl_FragCoord.xy / res.xy;
-  float color = snoise(vec3(vec2(q*size), left));// + vec2(left, up));
-  gl_FragColor = vec4(vec3(r, g, b)*color, 1.0);
+  float snice = snoise(vec3(vec2(q*size), left));// + vec2(left, up));
+  vec3 color = vec3(r, g, b)*snice;
+  float alpha = distance(vec3(0, 0, 0), color);
+  gl_FragColor = vec4(color, alpha);
 }

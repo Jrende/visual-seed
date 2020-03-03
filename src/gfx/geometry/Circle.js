@@ -7,16 +7,18 @@ function generateGeometry(numPoints) {
     return circleGeometries[numPoints];
   }
 
-  let points = [0, 0, 0];
+  let points = [0, 0, 0, 0, 0];
   let indices = [];
   for(let i = 0; i < numPoints + 1; i++) {
     points.push(Math.sin((2 * Math.PI / numPoints) * i));
     points.push(Math.cos((2 * Math.PI / numPoints) * i));
     points.push(0);
+    points.push((Math.sin((2 * Math.PI / numPoints) * i) + 1.1) / 2);
+    points.push((Math.cos((2 * Math.PI / numPoints) * i) + 1.1) / 2);
     indices.push(i);
   }
   indices.push(1);
-  let circle = new VertexArray(points, indices, [3], gl.TRIANGLE_FAN);
+  let circle = new VertexArray(points, indices, [3, 2], gl.TRIANGLE_FAN);
   circleGeometries[numPoints] = circle;
   return circle;
 }

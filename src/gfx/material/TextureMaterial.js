@@ -1,9 +1,10 @@
-import shaders from '../shader';
+import getShader from '../shader';
 import Texture from '../Texture';
 
 export default class TextureMaterial {
   constructor(texturePath) {
-    this.shader = shaders.textureMaterial;
+    this.shader = getShader('textureMaterial');
+    //TODO: Global texture lookup
     this.texture = new Texture(texturePath);
     this.texture.compile();
   }

@@ -1,4 +1,5 @@
 attribute vec3 aVertexPosition;
+attribute vec2 TexCoord;
 varying vec3 worldPos;
 uniform mat4 mvp;
 uniform mat4 modelMat;
