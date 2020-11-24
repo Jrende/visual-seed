@@ -1,5 +1,5 @@
 import VertexArray from '../VertexArray';
-class Quad {
+export default class Quad {
   constructor() {
     this.geometry = new VertexArray(
       [
@@ -14,9 +14,10 @@ class Quad {
   }
 
   addToWorld(world, material) {
-    world.material = material;
-    world.geometry = this.geometry;
+    let child = world.createChild();
+    child.material = material;
+    child.geometry = this.geometry;
   }
 }
 
-export default new Quad();
+export const QUAD = new Quad();

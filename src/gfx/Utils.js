@@ -1,5 +1,6 @@
 import shaders from './shader';
 import VertexArray from './VertexArray';
+import tinycolor from 'tinycolor2';
 
 export function nextPowOf2(x) {
   return Math.pow(2, Math.ceil(Math.log(x) / Math.log(2)));
@@ -79,3 +80,33 @@ export function colorToArray(col) {
   return [c.r, c.g, c.b].map(i => i / 255.0);
 }
 
+export function getColor(color) {
+  if(color === undefined) {
+    return [0, 0, 0, 1];
+  } else if(Array.isArray(color)) {
+    if(color[3] === undefined) {
+      color[3] = 1.0;
+    } else {
+      color[0] *= color[3];
+      color[1] *= color[3];
+      color[2] *= color[3];
+    }
+    return color;
+  } else {
+    if(typeof color === 'string') {
+      color = tinycolor(color);
+    }
+    let n = Number.parseFloat(color);
+    if(!Number.isNaN(n)) {
+      return [n, n, n, 1.0];
+    }
+    let rgba = color.toRgb()
+
+    return [
+      rgba.r / 255,
+      rgba.g / 255,
+      rgba.b / 255,
+      rgba.a
+    ];
+  }
+}

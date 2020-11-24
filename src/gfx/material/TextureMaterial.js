@@ -1,9 +1,11 @@
 import getShader from '../shader';
 import Texture from '../Texture';
+import { Material } from './Material';
 
-export default class TextureMaterial {
+export default class TextureMaterial extends Material {
   constructor(texturePath) {
-    this.shader = getShader('textureMaterial');
+    super(getShader('textureMaterial'), 'TextureMaterial');
+
     //TODO: Global texture lookup
     this.texture = new Texture(texturePath);
     this.texture.compile();
@@ -11,9 +13,7 @@ export default class TextureMaterial {
 
   apply() {
     this.texture.bind(0);
-    this.shader.setUniforms({
-      sampler: 0
-    });
+    this.shader.setSampler2D('sampler', 0);
   }
 
   isTransparent() {

@@ -9,7 +9,6 @@ const extractLess = new ExtractTextPlugin({
 });
 
 module.exports = {
-  mode: 'development',
   entry: './src/main.js',
   devtool: 'source-map',
   resolve: {

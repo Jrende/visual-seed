@@ -1,5 +1,4 @@
 import * as glm from 'gl-matrix';
-import { degToRad } from './Utils';
 
 function calculateModelMatrix(transform) {
   glm.mat4.identity(transform.mat);
@@ -69,7 +68,7 @@ export default class Transform {
 
   rotate(angle, axis) {
     let newRot = glm.quat.create();
-    glm.quat.setAxisAngle(newRot, axis, degToRad(angle));
+    glm.quat.setAxisAngle(newRot, axis, angle);
     glm.quat.multiply(this.rot, this.rot, newRot);
     calculateModelMatrix(this);
   }

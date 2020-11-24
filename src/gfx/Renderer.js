@@ -2,6 +2,7 @@ import * as glm from 'gl-matrix';
 import getShader from './shader';
 import { Doublebuffer } from './Framebuffer';
 import VertexArray from './VertexArray';
+import { getColor } from './Utils.js';
 /* global gl, window */
 class Renderer {
   constructor() {
@@ -29,6 +30,8 @@ class Renderer {
     glm.mat4.lookAt(this.viewMatrix, [0, 0, 600], [0, 0, 0], [0, 1, 0]);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     this.presentationBuffer = new Doublebuffer(gl.canvas.width, gl.canvas.height, false, true);
+
+    this.postProcessors = [];
 
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
@@ -61,17 +64,11 @@ class Renderer {
     let nodes = c.opaque;
     if(c.transparent.length !== 0) {
       c.opaque.sort((a, b) => {
-        //let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
-        //let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
         return a.transform.getPosition()[2] - b.transform.getPosition()[2];
-        //return d2 - d1;
       });
 
       c.transparent.sort((a, b) => {
-        //let d1 = glm.vec3.dist(viewPos, a.transform.getPosition());
-        //let d2 = glm.vec3.dist(viewPos, b.transform.getPosition());
         return a.transform.getPosition()[2] - b.transform.getPosition()[2];
-        //return d2 - d1;
       });
 
       nodes = [...c.opaque, ...c.transparent];
@@ -80,6 +77,14 @@ class Renderer {
     this.presentationBuffer.renderTo(() => {
       this.renderScene(nodes);
     });
+    if(this.postProcessors.length > 0) {
+      this.presentationBuffer.flip();
+      this.postProcessors.forEach(postProcessor => {
+        this.presentationBuffer.renderTo(() => {
+          postProcessor.render(this.presentationBuffer.back);
+        });
+      });
+    }
     this.present();
   }
 
@@ -92,7 +97,8 @@ class Renderer {
     this.textureShader.bind();
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    this.textureShader.setUniforms({ sampler: 0, opacity: 1.0 });
+    this.textureShader.setSampler2D('sampler', 0);
+    this.textureShader.setFloat('opacity', 1.0);
     this.quad.bind();
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     this.quad.unbind();
@@ -129,27 +135,21 @@ class Renderer {
       let mvp = glm.mat4.multiply(glm.mat4.create(), vp, modelMat);
       node.material.apply();
 
-      node.material.shader.setUniforms({
-        mvp,
-        modelMat,
-        aspectRatio: this.aspectRatio
-      });
-
+      node.material.shader.setMat4('mvp', mvp);
+      node.material.shader.setMat4('modelMat', modelMat);
+      node.material.shader.setFloat('aspectRatio', this.aspectRatio);
       node.vertexArray.draw();
     }
     prevVertexArray.unbind();
     prevShader.unbind();
   }
 
-  static setBackgroundColor(color) {
-    if(color.toRgb !== undefined) {
-      let rgb = color.toRgb();
-      color = [
-        rgb.r / 255,
-        rgb.g / 255,
-        rgb.b / 255
-      ];
-    }
+  addPostProcessing(postProcessor) {
+    this.postProcessors.push(postProcessor);
+  }
+
+  static setBackgroundColor(col) {
+    let color = getColor(col);
     gl.clearColor(color[0], color[1], color[2], 1);
   }
 }

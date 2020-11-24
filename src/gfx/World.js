@@ -1,6 +1,7 @@
 import * as glm from 'gl-matrix';
 import Transform from './Transform';
 import SolidMaterial from './material/SolidMaterial';
+import { degToRad } from './Utils';
 
 export default class World {
   constructor(geometry, renderList = { opaque: [], transparent: [] }) {
@@ -55,7 +56,14 @@ export default class World {
     return this;
   }
 
-  rotate(angle, axis) {
+  rotateDeg(angle, axis = [0, 0, 1]) {
+    this.transformValue.rotate(degToRad(angle), axis);
+    this.update();
+    return this;
+  }
+
+
+  rotate(angle, axis = [0, 0, 1]) {
     this.transformValue.rotate(angle, axis);
     this.update();
     return this;

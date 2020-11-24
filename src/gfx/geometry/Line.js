@@ -1,4 +1,4 @@
-import Quad from './Quad';
+import {QUAD} from './Quad';
 
 export default class Line {
   constructor(from, to, width = 5) {
@@ -15,10 +15,10 @@ export default class Line {
 
   addToWorld(world, material) {
     let midpoint = [
-      (this.to[0]+this.from[0]),
-      (this.to[1]+this.from[1]),
-      (this.to[2]+this.from[2])
-    ].map(i => i/2.0);
+      (this.to[0] + this.from[0]) / 2.0,
+      (this.to[1] + this.from[1]) / 2.0,
+      (this.to[2] + this.from[2]) / 2.0
+    ]
     let p = [
       this.to[0] - this.from[0],
       this.to[1] - this.from[1],
@@ -29,7 +29,7 @@ export default class Line {
 
     let child = world.createChild();
     child.material = material;
-    child.geometry = Quad.geometry;
+    child.geometry = QUAD.geometry;
     child.translate(midpoint);
     child.rotate(angle, [0, 0, 1]);
     child.scale([this.width, len/2.0, 1]);

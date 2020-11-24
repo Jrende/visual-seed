@@ -30,7 +30,7 @@ function generateGeometry(numPoints, innerRadius) {
   return new VertexArray(points, indices, [3], gl.TRIANGLES);
 }
 
-export default class Line {
+export default class Ring {
   constructor(points = 6, innerRadius = 0.5) {
     this.points = points;
 

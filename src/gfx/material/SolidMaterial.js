@@ -1,24 +1,15 @@
 import getShader from '../shader';
-import Material from './Material';
+import { Material } from './Material';
+import { getColor } from '../Utils';
 
 export default class SolidMaterial extends Material {
   constructor(color) {
-    super();
-    this.shader = getShader('solid');
-    this.color = color;
-    if(color[3] === undefined) {
-      color[3] = 1.0;
-    } else {
-      color[0] *= color[3];
-      color[1] *= color[3];
-      color[2] *= color[3];
-    }
+    super(getShader('solid'), 'SolidMaterial');
+    this.color = getColor(color);
   }
 
   apply() {
-    this.shader.setUniforms({
-      color: this.color
-    });
+    this.shader.setVec4('color', this.color);
   }
 
   isTransparent() {
