@@ -23,6 +23,16 @@ function generateGeometry(numPoints) {
   return circle;
 }
 
+let circleCache = {};
+function getCircle(numPoints) {
+  let key = numPoints + "" + innerRadius;
+  if(circleCache[key] === undefined) {
+    let circleGeo = generateGeometry(numPoints);
+    circleCache[key] = circleGeo;
+  }
+  return circleCache[key];
+}
+
 export default class Circle {
   constructor(points = 6) {
     this.points = points;

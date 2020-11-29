@@ -5,9 +5,12 @@ function initTexture(width, height, format, attachment) {
 
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, format, width, height, 0, format, gl.UNSIGNED_BYTE, null);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.generateMipmap(gl.TEXTURE_2D);
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
   gl.bindTexture(gl.TEXTURE_2D, null);
   gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, texture, 0);
 
@@ -24,7 +27,7 @@ function initRenderBuffer(width, height, component, attachment) {
 
 //gl.DEPTH_COMPONENT16
 //gl.DEPTH_ATTACHMENT
-export default class Framebuffer {
+export class Framebuffer {
   constructor(width, height, withStencil = false, withDepth = false) {
     const framebuffer = gl.createFramebuffer();
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
@@ -42,6 +45,11 @@ export default class Framebuffer {
         gl.STENCIL_INDEX8,
         gl.STENCIL_ATTACHMENT);
     }
+    gl.viewport(0, 0, width, height);
+    let status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if(status !== gl.FRAMEBUFFER_COMPLETE) {
+      console.error("Error creating framebuffer, got status", status);
+    }
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -52,6 +60,12 @@ export default class Framebuffer {
 
   bind() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.framebuffer.texture,
+      0);
   }
 
   unbind() {
@@ -68,13 +82,24 @@ export default class Framebuffer {
 
 export class Doublebuffer {
   constructor(width, height, withStencil = false, withDepth = false) {
+    this.state = false;
     this.front = new Framebuffer(width, height, withStencil, withDepth);
     this.back = new Framebuffer(width, height, withStencil, withDepth);
+    this.clearBits = gl.COLOR_BUFFER_BIT
+    if(withDepth) {
+      this.clearBits |= gl.DEPTH_BUFFER_BIT;
+    }
   }
 
 
   bind() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.front.framebuffer);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      this.front.texture,
+      0);
   }
 
   unbind() {
@@ -86,6 +111,7 @@ export class Doublebuffer {
     let temp = this.front;
     this.front = this.back;
     this.back = temp;
+    this.state = !this.state;
   }
 
   getTexture() {
@@ -97,5 +123,13 @@ export class Doublebuffer {
     renderCmd();
     this.unbind();
     return this;
+  }
+
+  clear() {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.front.framebuffer);
+    gl.clear(this.clearBits);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.back.framebuffer);
+    gl.clear(this.clearBits);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }

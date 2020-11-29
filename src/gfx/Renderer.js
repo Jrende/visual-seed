@@ -1,6 +1,6 @@
 import * as glm from 'gl-matrix';
 import getShader from './shader';
-import { Doublebuffer } from './Framebuffer';
+import { Doublebuffer, Framebuffer } from './Framebuffer';
 import VertexArray from './VertexArray';
 import { getColor } from './Utils.js';
 /* global gl, window */
@@ -30,30 +30,34 @@ class Renderer {
     glm.mat4.lookAt(this.viewMatrix, [0, 0, 600], [0, 0, 0], [0, 1, 0]);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     this.presentationBuffer = new Doublebuffer(gl.canvas.width, gl.canvas.height, false, true);
-
     this.postProcessors = [];
+
+    this.renderBuffers = [];
+    this.renderIndex = 0;
 
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
     this.aspectRatio = cw / ch;
     window.addEventListener('resize', () => {
       this.aspectRatio = gl.canvas.clientWidth / gl.canvas.clientHeight;
     });
 
     this.quad = new VertexArray(
-      [1, 1, 1,
-        -1, 1, 1,
-        -1, -1, 1,
-        1, -1, 1],
+      [
+        1, 1, 1, 1,
+        -1, 1, 0, 1,
+        -1, -1,0, 0,
+        1, -1, 1, 0
+      ],
       [1, 0, 2,
         2, 0, 3],
-      [3]);
-
+      [2, 2]);
     this.textureShader = getShader('texture');
   }
 
-  render(world) {
+  render(world, postProcessors = []) {
     let viewPos = [
       this.viewMatrix[12],
       this.viewMatrix[13],
@@ -74,35 +78,17 @@ class Renderer {
       nodes = [...c.opaque, ...c.transparent];
     }
 
-    this.presentationBuffer.renderTo(() => {
-      this.renderScene(nodes);
-    });
-    if(this.postProcessors.length > 0) {
-      this.presentationBuffer.flip();
-      this.postProcessors.forEach(postProcessor => {
-        this.presentationBuffer.renderTo(() => {
-          postProcessor.render(this.presentationBuffer.back);
-        });
-      });
+    this.presentationBuffer.bind();
+    this.renderScene(nodes);
+    this.presentationBuffer.unbind();
+
+    gl.disable(gl.DEPTH_TEST);
+    for(let i = 0; i < postProcessors.length; i++) {
+      postProcessors[i].apply(this.presentationBuffer);
     }
-    this.present();
-  }
+    gl.enable(gl.DEPTH_TEST);
 
-  present() {
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    this.drawTexture(this.presentationBuffer.getTexture());
-  }
-
-  drawTexture(texture) {
-    this.textureShader.bind();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    this.textureShader.setSampler2D('sampler', 0);
-    this.textureShader.setFloat('opacity', 1.0);
-    this.quad.bind();
-    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    this.quad.unbind();
-    this.textureShader.unbind();
+    this.drawTexture(this.presentationBuffer.back.texture);
   }
 
   renderScene(renderlist) {
@@ -138,11 +124,39 @@ class Renderer {
       node.material.shader.setMat4('mvp', mvp);
       node.material.shader.setMat4('modelMat', modelMat);
       node.material.shader.setFloat('aspectRatio', this.aspectRatio);
+
       node.vertexArray.draw();
     }
     prevVertexArray.unbind();
     prevShader.unbind();
   }
+
+  present() {
+    this.textureShader.bind();
+    this.quad.bind();
+    this.renderBuffers.forEach(framebuffer => {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      this.textureShader.setSampler2D('sampler', 0);
+      this.textureShader.setFloat('opacity', 1.0);
+      this.quad.draw();
+    });
+    this.quad.unbind();
+    this.textureShader.unbind();
+  }
+
+  drawTexture(texture) {
+    this.textureShader.bind();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    this.textureShader.setSampler2D('sampler', 0);
+    this.textureShader.setFloat('opacity', 1.0);
+    this.quad.bind();
+    this.quad.draw();
+    this.quad.unbind();
+    this.textureShader.unbind();
+  }
+
 
   addPostProcessing(postProcessor) {
     this.postProcessors.push(postProcessor);

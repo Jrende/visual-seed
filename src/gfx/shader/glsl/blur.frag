@@ -1,5 +1,5 @@
 precision highp float;
-varying vec2 vTexCoord;
+varying vec2 uv;
 
 uniform sampler2D texture;
 uniform float resolution;
@@ -12,7 +12,7 @@ void main() {
   vec4 sum = vec4(0.0);
 
   //our original texcoord for this fragment
-  vec2 tc = vTexCoord;
+  vec2 tc = uv;
 
   //the amount to blur, i.e. how far off center to sample from 
   //1.0 -> blur by one pixel
@@ -41,4 +41,8 @@ void main() {
 
   //discard alpha for our simple demo, multiply by vertex color and return
   gl_FragColor = vec4(vec3(sum.rgb * color), sum.a);
+  //vec3 c = texture2D(texture, uv.st).rgb;
+  //gl_FragColor = vec4( c.r, 0.0, c.b, 1.0);
+  //gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+  //gl_FragColor = vec4(uv.s, uv.t, 0.0, 1.0);
 }

@@ -2,6 +2,16 @@ import VertexArray from '../VertexArray';
 import { radToDeg } from '../Utils.js';
 /* global gl */
 
+let ringCache = {};
+function getRing(numPoints, innerRadius) {
+  let key = numPoints + "" + innerRadius;
+  if(ringCache[key] === undefined) {
+    let ringGeo = generateGeometry(numPoints, innerRadius);
+    ringCache[key] = ringGeo;
+  }
+  return ringCache[key];
+}
+
 function generateGeometry(numPoints, innerRadius) {
   let points = [0, 0, 0];
   let indices = [];
@@ -33,8 +43,7 @@ function generateGeometry(numPoints, innerRadius) {
 export default class Ring {
   constructor(points = 6, innerRadius = 0.5) {
     this.points = points;
-
-    this.vertexArray = generateGeometry(points, innerRadius);
+    this.vertexArray = getRing(points, innerRadius);
   }
 
   addToWorld(world, material) {

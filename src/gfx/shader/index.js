@@ -5,6 +5,9 @@ import blurFrag from './glsl/blur.frag';
 import cloudFrag from './glsl/cloud.frag';
 import checkerFrag from './glsl/checkers.frag';
 import gradientFrag from './glsl/megaGradient.frag';
+import removeRed from './glsl/removeRed.frag';
+import removeGreen from './glsl/removeGreen.frag';
+import removeBlue from './glsl/removeBlue.frag';
 
 import genUv2D from './glsl/genUv2D.vert';
 import postprocess from './glsl/postprocess.vert';
@@ -38,6 +41,19 @@ const shaders = {
     frag: blurFrag,
     vert: postprocess
   }),
+  removeBlue: new Shader({
+    frag: removeBlue,
+    vert: postprocess
+  }),
+  removeGreen: new Shader({
+    frag: removeGreen,
+    vert: postprocess
+  }),
+  removeRed: new Shader({
+    frag: removeRed,
+    vert: postprocess
+  }),
+
 
   texture: new Shader({
     frag: textureShaderFrag,
