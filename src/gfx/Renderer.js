@@ -58,6 +58,13 @@ class Renderer {
   }
 
   render(world, postProcessors = []) {
+    let frameBuffer = this.renderBuffers[this.renderIndex];
+    if(frameBuffer === undefined) {
+      frameBuffer = new Doublebuffer(gl.canvas.width, gl.canvas.height, false, true);
+      this.renderBuffers[this.renderIndex] = frameBuffer;
+    }
+    //this.setClearAlpha(1.0);
+    frameBuffer.clear();
     let viewPos = [
       this.viewMatrix[12],
       this.viewMatrix[13],
@@ -78,22 +85,22 @@ class Renderer {
       nodes = [...c.opaque, ...c.transparent];
     }
 
-    this.presentationBuffer.bind();
+    frameBuffer.bind();
     this.renderScene(nodes);
-    this.presentationBuffer.unbind();
+    frameBuffer.unbind();
 
     gl.disable(gl.DEPTH_TEST);
     for(let i = 0; i < postProcessors.length; i++) {
-      postProcessors[i].apply(this.presentationBuffer);
+      postProcessors[i].apply(frameBuffer);
     }
     gl.enable(gl.DEPTH_TEST);
-
-    this.drawTexture(this.presentationBuffer.back.texture);
+    this.renderIndex++;
   }
 
   renderScene(renderlist) {
     let prevVertexArray = null;
     let prevShader = null;
+    this.setClearAlpha(0.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     for(let i = 0; i < renderlist.length; i++) {
       let node = renderlist[i];
@@ -132,17 +139,20 @@ class Renderer {
   }
 
   present() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.disable(gl.DEPTH_TEST);
     this.textureShader.bind();
     this.quad.bind();
     this.renderBuffers.forEach(framebuffer => {
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.bindTexture(gl.TEXTURE_2D, framebuffer.back.texture);
       this.textureShader.setSampler2D('sampler', 0);
-      this.textureShader.setFloat('opacity', 1.0);
       this.quad.draw();
     });
     this.quad.unbind();
     this.textureShader.unbind();
+    this.renderIndex = 0;
+    gl.enable(gl.DEPTH_TEST);
   }
 
   drawTexture(texture) {
@@ -150,21 +160,25 @@ class Renderer {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     this.textureShader.setSampler2D('sampler', 0);
-    this.textureShader.setFloat('opacity', 1.0);
     this.quad.bind();
     this.quad.draw();
     this.quad.unbind();
     this.textureShader.unbind();
   }
 
+  setClearAlpha(alpha) {
+    gl.clearColor(this.clearColor[0], this.clearColor[1], this.clearColor[2], alpha);
+  }
 
   addPostProcessing(postProcessor) {
     this.postProcessors.push(postProcessor);
   }
 
-  static setBackgroundColor(col) {
-    let color = getColor(col);
-    gl.clearColor(color[0], color[1], color[2], 1);
+  setBackgroundColor(col) {
+    this.clearColor = getColor(col);
+    let color = this.clearColor;
+    //How to handle alpha???
+    gl.clearColor(color[0], color[1], color[2], 0.0);
   }
 }
 export default Renderer;

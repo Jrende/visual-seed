@@ -8,7 +8,6 @@ export class RemoveRed extends PostProcessor{
   }
 
   apply(buffer) {
-    this.show(buffer.back.texture);
     this.shader.bind();
     this.quad.bind();
     buffer.bind()
@@ -19,8 +18,6 @@ export class RemoveRed extends PostProcessor{
     buffer.unbind();
     this.quad.unbind();
     this.shader.unbind();
-    this.show(buffer.back.texture);
-    //this.show(buffer.front.texture);
   }
 }
 

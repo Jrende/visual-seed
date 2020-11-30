@@ -15,20 +15,5 @@ export class PostProcessor {
   constructor(shader) {
     this.shader = shader;
     this.quad = quad;
-    this.textureShader = getShader('texture');
-  }
-
-  show(texture) {
-    /*
-    this.textureShader.bind();
-    this.quad.bind();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    this.textureShader.setSampler2D('sampler', 0);
-    this.textureShader.setFloat('opacity', 1.0);
-    this.quad.draw();
-    this.quad.unbind();
-    this.textureShader.unbind();
-    */
   }
 }

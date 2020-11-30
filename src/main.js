@@ -24,43 +24,11 @@ import { RemoveRed } from './gfx/postprocessors/RemoveRed';
 import { RemoveGreen } from './gfx/postprocessors/RemoveGreen';
 import { RemoveBlue } from './gfx/postprocessors/RemoveBlue';
 
+import { random } from './Random';
+
 import tex1 from './assets/tex1.png';
 import tex2 from './assets/tex2.png';
 import tex1Alpha from './assets/tex1_alpha.png';
-
-class RNG {
-  // LCG using GCC's constants
-  constructor(seed) {
-    this.m = 0x80000000; // 2**31;
-    this.a = 1103515245;
-    this.c = 12345;
-
-    this.state = seed ? seed : Math.floor(Math.random() * (this.m - 1));
-  }
-  nextInt() {
-    this.state = (this.a * this.state + this.c) % this.m;
-    return this.state;
-  }
-  nextFloat() {
-    // returns in range [0,1]
-    return this.nextInt() / (this.m - 1);
-  }
-  nextRange(start, end) {
-    // returns in range [start, end): including start, excluding end
-    // can't modulu nextInt because of weak randomness in lower bits
-    var rangeSize = end - start;
-    var randomUnder1 = this.nextInt() / this.m;
-    return start + Math.floor(randomUnder1 * rangeSize);
-  }
-  choice(array) {
-    return array[this.nextRange(0, array.length)];
-  }
-}
-let rng = new RNG(Math.random());
-function random() {
-  return rng.nextFloat();
-}
-
 function createRingThing(child, color, pos, size) {
   let outerRing = child.createChild(
     new Ring(64, 0.95),
@@ -70,7 +38,7 @@ function createRingThing(child, color, pos, size) {
 
   let num = 16;
   for(let i = 0; i < num; i++) {
-    let rot = i / num * Math.PI * 2 + random();
+    let rot = i / num * Math.PI * 2 + random.nextFloat();
     let outerCircle = outerRing.createChild(
       new Circle(16),
       new SolidMaterial(color))
@@ -88,9 +56,9 @@ function createRingThing(child, color, pos, size) {
   }
 }
 
-function createWorld() {
-  let c = tinycolor('#f00').spin(360 * random()).darken(20).desaturate(20);
-  world.createChild(
+function createWorld(foreground, background) {
+  let c = tinycolor('#f00').spin(360 * random.nextFloat()).darken(20).desaturate(20);
+  background.createChild(
     new Quad(),
     new GradientMaterial([
       {
@@ -103,49 +71,50 @@ function createWorld() {
       }
     ]))
     .scale([256, 256, 1])
-    .rotateDeg(random() * 360)
+    .rotateDeg(random.nextFloat() * 360)
     .translate([0, 0, 0.2]);
-  let child = world.createChild().translate([0, 0, 1.5])
-  createRingThing(child,
+  let fgChild = foreground.createChild().translate([0, 0, 1.5])
+  let bgChild = background.createChild().translate([0, 0, 1.5])
+  createRingThing(fgChild,
     1.0,
     [
-      (random() - 0.5) * 50,
-      (random() - 0.5) * 50,
+      (random.nextFloat() - 0.5) * 50,
+      (random.nextFloat() - 0.5) * 50,
       2.6
     ],
     100);
-  createRingThing(child,
+  createRingThing(bgChild,
     0.7,
     [
-      (random() - 0.5) * 200,
-      (random() - 0.5) * 200,
+      (random.nextFloat() - 0.5) * 200,
+      (random.nextFloat() - 0.5) * 200,
       0.0
     ],
     25);
 
-  world.createChild(
+  background.createChild(
     new Ring(64, 0.997),
     new SolidMaterial('#fff'))
   .translate([-400, -200, 2.0])
   .scale(300);
-  world.createChild(
+  background.createChild(
     new Ring(64, 0.997),
     new SolidMaterial('#fff'))
   .translate([200, 100, 2.0])
   .scale(300);
 
   for(let i = 0; i < 100; i++) {
-    let dot = world.createChild(
+    let dot = background.createChild(
       new Circle(),
       new SolidMaterial('#fff')
     )
-    .scale((random() + 0.5))
+    .scale((random.nextFloat() + 0.5))
       .translate([
-        (random() - 0.5) * 500,
-        (random() - 0.5) * 500,
+        (random.nextFloat() - 0.5) * 500,
+        (random.nextFloat() - 0.5) * 500,
         10
       ]);
-    if(random() < 0.1) {
+    if(random.nextFloat() < 0.1) {
       let lines = dot
         .createChild(
         new Line(
@@ -154,7 +123,7 @@ function createWorld() {
           0.1
         ),
         new SolidMaterial('#fff')
-        ).rotateDeg(360 * random())
+        ).rotateDeg(360 * random.nextFloat())
         .createChild(
           new Line(
             [0, -1000, 0],
@@ -169,7 +138,7 @@ function createWorld() {
 
 /* global window */
 let renderer = new Renderer();
-Renderer.setBackgroundColor('#fff');
+renderer.setBackgroundColor('#000');
 
 /*
 renderer.addPostProcessing(new RemoveRed());
@@ -177,23 +146,33 @@ renderer.addPostProcessing(new RemoveBlue());
 renderer.addPostProcessing(new RemoveGreen());
 */
 
-let pp = [new Blur(0.75)];
+let foregroundPostprocessing = [new Blur(1.75)];
+let backgroundPostprocessing = [new Blur(0.75)];
+//let backgroundPostprocessing = [];
+//let pp = [];
 
-let world = new World();
-createWorld();
-
-//renderer.render(world);
-
+let foreground = new World();
+let background = new World();
+createWorld(foreground, background);
+render();
 document.querySelector('canvas').addEventListener('click', () => {
-  rng = new RNG(Math.random());
-  world = new World();
-  createWorld();
-  renderer.render(world, pp);
+  random.setSeed(Math.random());
+  foreground = new World();
+  background = new World();
+  createWorld(foreground, background);
+  render();
 });
 
+function render() {
+  renderer.render(background, foregroundPostprocessing);
+  renderer.render(foreground, backgroundPostprocessing);
+  renderer.present();
+}
+/*
 function render() {
   window.requestAnimationFrame(render);
   renderer.render(world, pp);
 }
 
 render(world);
+*/
